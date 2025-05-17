@@ -1,0 +1,20 @@
+services:
+  postgresql:
+    # Set wal_level from replica (default) to logical
+    # so that Debezium can capture change
+    image: postgres:16-alpine
+    env_file:
+      - .env 
+    command: ['postgres', '-c', 'wal_level=logical']
+    container_name: postgresql    
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes: 
+      - ktpm:/var/lib/postgresql/data
+      #- init.sql:/docker-entrypoint-initdb.d/init.sql
+volumes:
+  ktpm:
