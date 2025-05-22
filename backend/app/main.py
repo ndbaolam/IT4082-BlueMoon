@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from .database import engine, Base
-from .routers import nhankhau, hokhau, user
+from .routers import nhankhau, hokhau, user, tamtrutamvang
 from fastapi.middleware.cors import CORSMiddleware
 
 Base.metadata.create_all(bind=engine)
@@ -16,7 +16,7 @@ app.add_middleware(
 )
 
 app.include_router(user.router)
-# app.include_router(nhankhau.router)
-# app.include_router(hokhau.router)
-# app.include_router(tamtrutamvang.router)
+app.include_router(nhankhau.router)
+app.include_router(hokhau.router)
+app.include_router(tamtrutamvang.router)
 # app.include_router(khoanthu.router)

@@ -20,3 +20,4 @@ from app.models.nhan_khau import NhanKhau
 from app.models.hokhau_nhankhau import HoKhauNhanKhau
 from app.models.lich_su_ho_khau import LichSuHoKhau
 from app.models.user import User
+from app.models.tamtrutamvang import TamTruTamVang
