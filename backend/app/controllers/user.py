@@ -10,7 +10,7 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 
 def create_user(db: Session, user: user_schema.UserCreate):
     # hashed_pw = hash_password(user.password)
-    db_user = User(username=user.username, password=user.password, vaitro=user.vaitro)
+    db_user = User(username=user.username, password=user.password, vaitro=user.vaitro, first_name=user.first_name, last_name=user.last_name)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)

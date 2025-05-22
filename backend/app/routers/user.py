@@ -26,7 +26,7 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 def register_user(user: user_schema.UserCreate, db: Session = Depends(get_db)):
     existing_user = user_controller.get_user(db, user.username)
     if existing_user:
-        raise HTTPException(status_code=400, detail="Username đã tồn tại")
+        raise HTTPException(status_code=400, detail="username đã tồn tại")
 
     new_user = user_controller.create_user(db, user)
     return new_user
@@ -58,5 +58,7 @@ def delete_user(username: str, db: Session = Depends(get_db)):
 def read_own_info(current_user: User = Depends(get_current_user)):
     return {
         "username": current_user.username,
-        "vaitro": current_user.vaitro
+        "vaitro": current_user.vaitro,
+        "first_name": current_user.first_name,
+        "last_name": current_user.last_name
     }

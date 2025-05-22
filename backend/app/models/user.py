@@ -9,3 +9,5 @@ class User(Base):
     username = Column(String(50), unique=True, index=True, nullable=False)
     password = Column(String(255), nullable=False)
     vaitro = Column(String(20), nullable=False)
+    first_name = Column(String(20), nullable=False)
+    last_name = Column(String(20), nullable=False)

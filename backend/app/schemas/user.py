@@ -5,6 +5,8 @@ from datetime import date
 class UserBase(BaseModel):
     username: str
     vaitro: str
+    first_name: str
+    last_name: str
 
 class UserCreate(UserBase):
     password: str
