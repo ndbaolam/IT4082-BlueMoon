@@ -14,7 +14,7 @@ Base = declarative_base()
 
 # Import các model sau khi tạo Base
 from app.models.khoanthu import KhoanThu
-from app.models.nop_tien import NopTien
+from app.models.noptien import NopTien
 from app.models.hokhau import HoKhau
 from app.models.nhan_khau import NhanKhau
 from app.models.hokhau_nhankhau import HoKhauNhanKhau
