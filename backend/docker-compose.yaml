@@ -6,7 +6,8 @@ services:
     env_file:
       - .env 
     command: ['postgres', '-c', 'wal_level=logical']
-    container_name: postgresql    
+    container_name: postgresql  
+    hostname: postgresql
     ports:
       - "5432:5432"
     environment:
@@ -16,5 +17,27 @@ services:
     volumes: 
       - ktpm:/var/lib/postgresql/data
       #- init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgresql
+    volumes:
+      - ./pgadmin_config/servers.json:/pgadmin4/servers.json
+    entrypoint:
+      - "/bin/sh"
+      - "-c"
+      - |
+        mkdir -p /var/lib/pgadmin/storage/admin_example.com/
+        cp /pgadmin4/servers.json /var/lib/pgadmin/storage/admin_example.com/servers.json
+        /entrypoint.sh
+
 volumes:
   ktpm:
