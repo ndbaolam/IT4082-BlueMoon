@@ -1,5 +1,5 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import apiClient from "@/axiosConfig";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,22 +14,40 @@ interface ProfileProps {
 
 export const Profile = ({ userRole }: ProfileProps) => {
   const [profileData, setProfileData] = useState({
-    fullName: userRole === "to_truong" ? "Nguyễn Văn Tài" : "Trần Thị Hoa",
-    email: userRole === "to_truong" ? "tai.nguyen@example.com" : "hoa.tran@example.com",
-    phone: "0123456789",
-    address: "123 Nguyễn Trãi, Quận 1, TP.HCM",
-    joinDate: "2024-01-15"
+    fullName: "",
+    email: "",
+    phone: "",
+    address: "",
+    joinDate: "",
   });
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
+
+  useEffect(() => {
+    // Fetch personal information from the backend
+    apiClient
+      .get("/users/me")
+      .then((response) => {
+        const data = response.data;
+        setProfileData({
+          fullName: `${data.first_name} ${data.last_name}`,
+          email: `${data.username}@example.com`, // Assuming email is derived from username
+          phone: "0123456789", // Replace with actual phone if available
+          address: "123 Nguyễn Trãi, Quận 1, TP.HCM", // Replace with actual address if available
+          joinDate: new Date(data.created_at).toLocaleDateString("vi-VN"),
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching profile data:", error);
+      });
+  }, []);
 
   const handleProfileUpdate = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle profile update logic here
     console.log("Profile updated:", profileData);
   };
 
@@ -39,12 +57,11 @@ export const Profile = ({ userRole }: ProfileProps) => {
       alert("Mật khẩu xác nhận không khớp!");
       return;
     }
-    // Handle password change logic here
     console.log("Password changed");
     setPasswordData({
       currentPassword: "",
       newPassword: "",
-      confirmPassword: ""
+      confirmPassword: "",
     });
   };
 
@@ -61,7 +78,7 @@ export const Profile = ({ userRole }: ProfileProps) => {
             <Avatar className="w-24 h-24 mx-auto mb-4">
               <AvatarImage src="" />
               <AvatarFallback className="text-2xl bg-blue-100 text-blue-600">
-                {profileData.fullName.split(' ').map(n => n[0]).join('')}
+                {profileData.fullName.split(" ").map((n) => n[0]).join("")}
               </AvatarFallback>
             </Avatar>
             <CardTitle>{profileData.fullName}</CardTitle>
@@ -115,7 +132,9 @@ export const Profile = ({ userRole }: ProfileProps) => {
                       <Input
                         id="fullName"
                         value={profileData.fullName}
-                        onChange={(e) => setProfileData({...profileData, fullName: e.target.value})}
+                        onChange={(e) =>
+                          setProfileData({ ...profileData, fullName: e.target.value })
+                        }
                       />
                     </div>
                     <div className="space-y-2">
@@ -124,7 +143,9 @@ export const Profile = ({ userRole }: ProfileProps) => {
                         id="email"
                         type="email"
                         value={profileData.email}
-                        onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                        onChange={(e) =>
+                          setProfileData({ ...profileData, email: e.target.value })
+                        }
                       />
                     </div>
                   </div>
@@ -134,7 +155,9 @@ export const Profile = ({ userRole }: ProfileProps) => {
                       <Input
                         id="phone"
                         value={profileData.phone}
-                        onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                        onChange={(e) =>
+                          setProfileData({ ...profileData, phone: e.target.value })
+                        }
                       />
                     </div>
                     <div className="space-y-2">
@@ -152,7 +175,9 @@ export const Profile = ({ userRole }: ProfileProps) => {
                     <Input
                       id="address"
                       value={profileData.address}
-                      onChange={(e) => setProfileData({...profileData, address: e.target.value})}
+                      onChange={(e) =>
+                        setProfileData({ ...profileData, address: e.target.value })
+                      }
                     />
                   </div>
                   <Button type="submit">Cập nhật thông tin</Button>
@@ -167,7 +192,9 @@ export const Profile = ({ userRole }: ProfileProps) => {
                       id="currentPassword"
                       type="password"
                       value={passwordData.currentPassword}
-                      onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, currentPassword: e.target.value })
+                      }
                       placeholder="Nhập mật khẩu hiện tại"
                     />
                   </div>
@@ -177,7 +204,9 @@ export const Profile = ({ userRole }: ProfileProps) => {
                       id="newPassword"
                       type="password"
                       value={passwordData.newPassword}
-                      onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, newPassword: e.target.value })
+                      }
                       placeholder="Nhập mật khẩu mới"
                     />
                   </div>
@@ -187,7 +216,9 @@ export const Profile = ({ userRole }: ProfileProps) => {
                       id="confirmPassword"
                       type="password"
                       value={passwordData.confirmPassword}
-                      onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                      }
                       placeholder="Nhập lại mật khẩu mới"
                     />
                   </div>
@@ -204,21 +235,27 @@ export const Profile = ({ userRole }: ProfileProps) => {
                         <div className="font-medium">Thông báo email</div>
                         <div className="text-sm text-gray-500">Nhận thông báo qua email</div>
                       </div>
-                      <Button variant="outline" size="sm">Bật</Button>
+                      <Button variant="outline" size="sm">
+                        Bật
+                      </Button>
                     </div>
                     <div className="flex items-center justify-between p-3 border rounded-lg">
                       <div>
                         <div className="font-medium">Đồng bộ dữ liệu</div>
                         <div className="text-sm text-gray-500">Tự động đồng bộ dữ liệu</div>
                       </div>
-                      <Button variant="outline" size="sm">Bật</Button>
+                      <Button variant="outline" size="sm">
+                        Bật
+                      </Button>
                     </div>
                     <div className="flex items-center justify-between p-3 border rounded-lg">
                       <div>
                         <div className="font-medium">Sao lưu tự động</div>
                         <div className="text-sm text-gray-500">Sao lưu dữ liệu hàng ngày</div>
                       </div>
-                      <Button variant="outline" size="sm">Bật</Button>
+                      <Button variant="outline" size="sm">
+                        Bật
+                      </Button>
                     </div>
                   </div>
                 </div>

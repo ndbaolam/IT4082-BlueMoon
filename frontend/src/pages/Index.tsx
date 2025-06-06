@@ -13,8 +13,9 @@ import TemporaryResidencePage from "./TemporaryResidencePage";
 import UserPage from "./UserPage";
 import ReportsPage from "./ReportsPage";
 import ProfilePage from "./ProfilePage";
+import apiClient from '../axiosConfig.ts'
 
-const Index = () => {
+const Index = () => {  
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<"to_truong" | "ke_toan">("to_truong");
   const navigate = useNavigate();
@@ -26,19 +27,40 @@ const Index = () => {
     navigate("/dashboard");
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    navigate("/");
-  };
-
-  useEffect(() => {
-    if (!isLoggedIn && location.pathname !== "/" && location.pathname !== "/login") {
-      navigate("/");
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("access_token"); 
+  
+      await apiClient.post(
+        "/users/logout",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      localStorage.removeItem("access_token"); // Clear the token
+      setIsLoggedIn(false); // Update state
+      navigate("/login"); // Redirect to login page
+    } catch (error) {
+      console.error("Error during logout:", error);
+      alert("Có lỗi xảy ra khi đăng xuất!");
     }
-  }, [isLoggedIn, location.pathname, navigate]);
+  };
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+  
+    if (token) {      
+      setIsLoggedIn(true);
+    } else if (location.pathname !== "/" && location.pathname !== "/login") {      
+      navigate("/login");
+    }
+  }, [location.pathname, navigate]);
 
   if (!isLoggedIn) {
-    return <Login onLogin={handleLogin} />;
+    return <Login />;
   }
 
   const renderPageContent = () => {

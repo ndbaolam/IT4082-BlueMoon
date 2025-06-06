@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional
 from datetime import date
 
 class NhanKhauBase(BaseModel):
@@ -19,5 +19,6 @@ class NhanKhauCreate(NhanKhauBase):
 
 class NhanKhau(NhanKhauBase):
     id: int
+
     class Config:
         from_attributes = True

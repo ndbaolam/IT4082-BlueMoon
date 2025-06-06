@@ -15,12 +15,12 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    username = verify_token(token)
-    if username is None:
+    email = verify_token(token)
+    if email is None:
         raise credentials_exception
 
     db = SessionLocal()
-    user = db.query(User).filter(User.username == username).first()
+    user = db.query(User).filter(User.email == email).first()
     db.close()
 
     if user is None:

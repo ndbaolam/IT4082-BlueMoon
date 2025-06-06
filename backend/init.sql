@@ -1,8 +1,17 @@
+CREATE TYPE user_role AS ENUM ('ke_toan', 'to_truong');
+
 CREATE TABLE users (
-    id SERIAL PRIMARY KEY
-    username VARCHAR(50) NOT NULL UNIQUE,
+    id SERIAL PRIMARY KEY,
     password VARCHAR(255) NOT NULL,
-    vaitro VARCHAR(20) NOT NULL
+    vaitro user_role NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    sodienthoai VARCHAR(20),
+    diachi VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    trangthai BOOLEAN DEFAULT TRUE
 );
 
 CREATE TABLE nhankhau (
@@ -16,7 +25,10 @@ CREATE TABLE nhankhau (
     ngaycap DATE,
     noicap VARCHAR(100),
     nghenghiep VARCHAR(100),
-    ghichu TEXT
+    ghichu TEXT,
+    trangthai BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE hokhau (
@@ -28,6 +40,9 @@ CREATE TABLE hokhau (
     quan VARCHAR(100),
     ngaylamhokhau DATE,
     chu_ho_id INT NOT NULL,
+    trangthai BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_chu_ho FOREIGN KEY (chu_ho_id) REFERENCES nhankhau(id) ON DELETE RESTRICT
 );
 
@@ -36,6 +51,8 @@ CREATE TABLE hokhau_nhankhau (
     nhankhau_id INT NOT NULL,
     ngaythem DATE,
     quanhevoichuho VARCHAR(50),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (hokhau_id, nhankhau_id),
     CONSTRAINT fk_hokhau FOREIGN KEY (hokhau_id) REFERENCES hokhau(id) ON DELETE CASCADE,
     CONSTRAINT fk_nhankhau FOREIGN KEY (nhankhau_id) REFERENCES nhankhau(id) ON DELETE CASCADE
@@ -46,11 +63,11 @@ CREATE TABLE lichsu_hokhau (
     hokhau_id INT NOT NULL,
     nhankhau_id INT NOT NULL,
     loaithaydoi SMALLINT NOT NULL CHECK (loaithaydoi IN (1, 2)), -- 1: thêm, 2: xóa
-    thoigian TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    thoigian TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ghichu TEXT,
     CONSTRAINT fk_hokhau_ls FOREIGN KEY (hokhau_id) REFERENCES hokhau(id) ON DELETE CASCADE,
     CONSTRAINT fk_nhankhau_ls FOREIGN KEY (nhankhau_id) REFERENCES nhankhau(id) ON DELETE CASCADE
 );
-
 
 CREATE TABLE tamtrutamvang (
     id SERIAL PRIMARY KEY,
@@ -59,6 +76,8 @@ CREATE TABLE tamtrutamvang (
     diachitamtrutamvang VARCHAR(255),
     thoigian DATE,
     noidungdenghi TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_nhankhau_tt FOREIGN KEY (nhankhau_id) REFERENCES nhankhau(id) ON DELETE CASCADE
 );
 
@@ -68,7 +87,10 @@ CREATE TABLE khoanthu (
     thoihan DATE,
     tenkhoanthu VARCHAR(100) NOT NULL,
     batbuoc BOOLEAN NOT NULL DEFAULT TRUE,
-    ghichu TEXT
+    ghichu TEXT,
+    trangthai BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE noptien (
@@ -78,6 +100,9 @@ CREATE TABLE noptien (
     nguoinop VARCHAR(100) NOT NULL,
     sotien NUMERIC(12,2) NOT NULL,
     ngaynop DATE NOT NULL DEFAULT CURRENT_DATE,
+    trangthai BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_hokhau_nt FOREIGN KEY (hokhau_id) REFERENCES hokhau(id) ON DELETE CASCADE,
     CONSTRAINT fk_khoanthu_nt FOREIGN KEY (khoanthu_id) REFERENCES khoanthu(id) ON DELETE CASCADE
 );
