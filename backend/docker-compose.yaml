@@ -39,5 +39,26 @@ services:
         cp /pgadmin4/servers.json /var/lib/pgadmin/storage/admin_example.com/servers.json
         /entrypoint.sh
 
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    container_name: fastapi
+    hostname: fastapi
+    env_file:
+      - ./.env
+    depends_on:
+      - postgresql
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      DATABASE_URL: postgresql://ktpm:ktpm@postgresql:5432/ktpm
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+
 volumes:
   ktpm:
