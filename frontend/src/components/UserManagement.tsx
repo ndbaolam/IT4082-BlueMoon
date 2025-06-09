@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,16 +9,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, Search, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import apiClient from "@/axiosConfig";
 
 interface User {
   id: number;
-  username: string;
   email: string;
-  role: "to_truong" | "ke_toan";
-  fullName: string;
-  phone: string;
-  status: "active" | "inactive";
-  createdAt: string;
+  vaitro: "to_truong" | "ke_toan";
+  first_name: string;
+  last_name: string;
+  sodienthoai?: string;
+  diachi?: string;
+  trangthai: boolean;
+  created_at: string;
 }
 
 interface UserManagementProps {
@@ -27,75 +28,28 @@ interface UserManagementProps {
 }
 
 export const UserManagement = ({ userRole }: UserManagementProps) => {
-  const [users, setUsers] = useState<User[]>([
-  {
-    "id": 3,
-    "username": "ketoan2",
-    "email": "ketoan2@todan.vn",
-    "role": "ke_toan",
-    "fullName": "Nguyễn Thị Hằng",
-    "phone": "0911223344",
-    "status": "active",
-    "createdAt": "2025-01-25"
-  },
-  {
-    "id": 4,
-    "username": "ketoan3",
-    "email": "ketoan3@todan.vn",
-    "role": "ke_toan",
-    "fullName": "Lê Văn Tài",
-    "phone": "0922334455",
-    "status": "active",
-    "createdAt": "2025-01-28"
-  },
-  {
-    "id": 5,
-    "username": "ketoan4",
-    "email": "ketoan4@todan.vn",
-    "role": "ke_toan",
-    "fullName": "Phạm Thị Minh",
-    "phone": "0933445566",
-    "status": "inactive",
-    "createdAt": "2025-02-02"
-  },
-  {
-    "id": 6,
-    "username": "ketoan5",
-    "email": "ketoan5@todan.vn",
-    "role": "ke_toan",
-    "fullName": "Trần Văn Long",
-    "phone": "0944556677",
-    "status": "active",
-    "createdAt": "2025-02-10"
-  },
-  {
-    "id": 7,
-    "username": "ketoan6",
-    "email": "ketoan6@todan.vn",
-    "role": "ke_toan",
-    "fullName": "Vũ Thị Lan",
-    "phone": "0955667788",
-    "status": "active",
-    "createdAt": "2025-02-15"
-  }
-]
-);
-
+  const [users, setUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [formData, setFormData] = useState<Partial<User>>({});
+  const [formData, setFormData] = useState<Partial<User & { password?: string }>>({});
   const { toast } = useToast();
 
+  // Lấy danh sách người dùng từ API khi load component
+  useEffect(() => {
+    apiClient.get("/users/")
+      .then(res => setUsers(res.data))
+      .catch(() => toast({ title: "Lỗi", description: "Không lấy được danh sách người dùng" }));
+  }, []);
+
   const filteredUsers = users.filter(user =>
-    user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    `${user.first_name} ${user.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleCreate = () => {
     setEditingUser(null);
-    setFormData({ role: "ke_toan", status: "active" });
+    setFormData({ vaitro: "ke_toan", trangthai: true });
     setIsDialogOpen(true);
   };
 
@@ -105,34 +59,64 @@ export const UserManagement = ({ userRole }: UserManagementProps) => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    setUsers(users.filter(u => u.id !== id));
-    toast({
-      title: "Thành công",
-      description: "Đã xóa người dùng thành công",
-    });
+  const handleDelete = async (id: number) => {
+    const user = users.find(u => u.id === id);
+    if (!user) return;
+    try {
+      await apiClient.delete(`/users/${user.email}`);
+      setUsers(users.filter(u => u.id !== id));
+      toast({
+        title: "Thành công",
+        description: "Đã xóa người dùng thành công",
+      });
+    } catch {
+      toast({ title: "Lỗi", description: "Xóa người dùng thất bại" });
+    }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (editingUser) {
-      setUsers(users.map(u => 
-        u.id === editingUser.id ? { ...u, ...formData } : u
-      ));
-      toast({
-        title: "Thành công",
-        description: "Đã cập nhật người dùng thành công",
-      });
+      // Update
+      try {
+        await apiClient.put(`/users/${formData.email}`, {
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          vaitro: formData.vaitro,
+          sodienthoai: formData.sodienthoai,
+          diachi: formData.diachi,
+          trangthai: formData.trangthai,
+        });
+        setUsers(users.map(u =>
+          u.id === editingUser.id ? { ...u, ...formData } as User : u
+        ));
+        toast({
+          title: "Thành công",
+          description: "Đã cập nhật người dùng thành công",
+        });
+      } catch {
+        toast({ title: "Lỗi", description: "Cập nhật người dùng thất bại" });
+      }
     } else {
-      const newUser = {
-        ...formData,
-        id: Math.max(...users.map(u => u.id)) + 1,
-        createdAt: new Date().toISOString().split('T')[0],
-      } as User;
-      setUsers([...users, newUser]);
-      toast({
-        title: "Thành công",
-        description: "Đã thêm người dùng mới thành công",
-      });
+      // Create
+      try {
+        const res = await apiClient.post("/users/register", {
+          password: formData.password || "123456",
+          vaitro: formData.vaitro,
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          email: formData.email,
+          sodienthoai: formData.sodienthoai,
+          diachi: formData.diachi,
+          trangthai: formData.trangthai,
+        });
+        setUsers([...users, res.data]);
+        toast({
+          title: "Thành công",
+          description: "Đã thêm người dùng mới thành công",
+        });
+      } catch {
+        toast({ title: "Lỗi", description: "Thêm người dùng thất bại" });
+      }
     }
     setIsDialogOpen(false);
     setFormData({});
@@ -195,11 +179,12 @@ export const UserManagement = ({ userRole }: UserManagementProps) => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Tên đăng nhập</TableHead>
                   <TableHead>Họ và tên</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Vai trò</TableHead>
                   <TableHead>Trạng thái</TableHead>
+                  <TableHead>Số điện thoại</TableHead>
+                  <TableHead>Địa chỉ</TableHead>
                   <TableHead>Ngày tạo</TableHead>
                   <TableHead className="text-right">Thao tác</TableHead>
                 </TableRow>
@@ -207,20 +192,21 @@ export const UserManagement = ({ userRole }: UserManagementProps) => {
               <TableBody>
                 {filteredUsers.map((user) => (
                   <TableRow key={user.id} className="hover:bg-gray-50/50">
-                    <TableCell className="font-medium">{user.username}</TableCell>
-                    <TableCell>{user.fullName}</TableCell>
+                    <TableCell>{user.first_name} {user.last_name}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
-                      <Badge variant={user.role === "to_truong" ? "default" : "secondary"}>
-                        {user.role === "to_truong" ? "Tổ trưởng" : "Kế toán"}
+                      <Badge variant={user.vaitro === "to_truong" ? "default" : "secondary"}>
+                        {user.vaitro === "to_truong" ? "Tổ trưởng" : "Kế toán"}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={user.status === "active" ? "default" : "destructive"}>
-                        {user.status === "active" ? "Hoạt động" : "Tạm khóa"}
+                      <Badge variant={user.trangthai ? "default" : "destructive"}>
+                        {user.trangthai ? "Hoạt động" : "Tạm khóa"}
                       </Badge>
                     </TableCell>
-                    <TableCell>{new Date(user.createdAt).toLocaleDateString('vi-VN')}</TableCell>
+                    <TableCell>{user.sodienthoai || ""}</TableCell>
+                    <TableCell>{user.diachi || ""}</TableCell>
+                    <TableCell>{new Date(user.created_at).toLocaleDateString('vi-VN')}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-2">
                         <Button
@@ -260,12 +246,21 @@ export const UserManagement = ({ userRole }: UserManagementProps) => {
             </DialogHeader>
             <div className="grid grid-cols-2 gap-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Tên đăng nhập *</Label>
+                <Label htmlFor="first_name">Họ *</Label>
                 <Input
-                  id="username"
-                  value={formData.username || ""}
-                  onChange={(e) => setFormData({...formData, username: e.target.value})}
-                  placeholder="Tên đăng nhập"
+                  id="first_name"
+                  value={formData.first_name || ""}
+                  onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                  placeholder="Họ"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="last_name">Tên *</Label>
+                <Input
+                  id="last_name"
+                  value={formData.last_name || ""}
+                  onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                  placeholder="Tên"
                 />
               </div>
               <div className="space-y-2">
@@ -274,31 +269,25 @@ export const UserManagement = ({ userRole }: UserManagementProps) => {
                   id="email"
                   type="email"
                   value={formData.email || ""}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="Email"
+                  disabled={!!editingUser}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="fullName">Họ và tên *</Label>
+                <Label htmlFor="password">Mật khẩu *</Label>
                 <Input
-                  id="fullName"
-                  value={formData.fullName || ""}
-                  onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-                  placeholder="Họ và tên"
+                  id="password"
+                  type="password"
+                  value={formData.password || ""}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  placeholder="Mật khẩu"
+                  disabled={!!editingUser}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Số điện thoại</Label>
-                <Input
-                  id="phone"
-                  value={formData.phone || ""}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  placeholder="Số điện thoại"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="role">Vai trò</Label>
-                <Select value={formData.role || ""} onValueChange={(value: "to_truong" | "ke_toan") => setFormData({...formData, role: value})}>
+                <Label htmlFor="vaitro">Vai trò</Label>
+                <Select value={formData.vaitro || ""} onValueChange={(value: "to_truong" | "ke_toan") => setFormData({ ...formData, vaitro: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Chọn vai trò" />
                   </SelectTrigger>
@@ -309,8 +298,8 @@ export const UserManagement = ({ userRole }: UserManagementProps) => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="status">Trạng thái</Label>
-                <Select value={formData.status || ""} onValueChange={(value: "active" | "inactive") => setFormData({...formData, status: value})}>
+                <Label htmlFor="trangthai">Trạng thái</Label>
+                <Select value={formData.trangthai === false ? "inactive" : "active"} onValueChange={(value: "active" | "inactive") => setFormData({ ...formData, trangthai: value === "active" })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Chọn trạng thái" />
                   </SelectTrigger>
@@ -319,6 +308,24 @@ export const UserManagement = ({ userRole }: UserManagementProps) => {
                     <SelectItem value="inactive">Tạm khóa</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sodienthoai">Số điện thoại</Label>
+                <Input
+                  id="sodienthoai"
+                  value={formData.sodienthoai || ""}
+                  onChange={(e) => setFormData({ ...formData, sodienthoai: e.target.value })}
+                  placeholder="Số điện thoại"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="diachi">Địa chỉ</Label>
+                <Input
+                  id="diachi"
+                  value={formData.diachi || ""}
+                  onChange={(e) => setFormData({ ...formData, diachi: e.target.value })}
+                  placeholder="Địa chỉ"
+                />
               </div>
             </div>
             <DialogFooter>

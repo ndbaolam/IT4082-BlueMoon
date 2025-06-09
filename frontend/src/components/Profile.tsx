@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import apiClient from "@/axiosConfig";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Lock, Settings } from "lucide-react";
-
+import apiClient from "@/axiosConfig";
 interface ProfileProps {
   userRole: "to_truong" | "ke_toan";
 }
@@ -28,17 +27,19 @@ export const Profile = ({ userRole }: ProfileProps) => {
   });
 
   useEffect(() => {
-    // Fetch personal information from the backend
+    // Lấy thông tin cá nhân từ backend
     apiClient
       .get("/users/me")
       .then((response) => {
         const data = response.data;
         setProfileData({
           fullName: `${data.first_name} ${data.last_name}`,
-          email: `${data.username}@example.com`, // Assuming email is derived from username
-          phone: "0123456789", // Replace with actual phone if available
-          address: "123 Trần đại Nghĩa, Hai Bà Trưng, Hà Nội", // Replace with actual address if available
-          joinDate: new Date(data.created_at).toLocaleDateString("vi-VN"),
+          email: data.email,
+          phone: data.sodienthoai || "",
+          address: data.diachi || "",
+          joinDate: data.created_at
+            ? new Date(data.created_at).toLocaleDateString("vi-VN")
+            : "",
         });
       })
       .catch((error) => {
@@ -46,24 +47,43 @@ export const Profile = ({ userRole }: ProfileProps) => {
       });
   }, []);
 
-  const handleProfileUpdate = (e: React.FormEvent) => {
+
+  const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Profile updated:", profileData);
+    try {
+      await apiClient.put(`/users/${profileData.email}`, {
+        first_name: profileData.fullName.split(" ")[0],
+        last_name: profileData.fullName.split(" ").slice(1).join(" "),
+        sodienthoai: profileData.phone,
+        diachi: profileData.address,
+      });
+      alert("Cập nhật thông tin thành công!");
+    } catch (error) {
+      alert("Cập nhật thông tin thất bại!");
+    }
   };
 
-  const handlePasswordChange = (e: React.FormEvent) => {
+    const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       alert("Mật khẩu xác nhận không khớp!");
       return;
     }
-    console.log("Password changed");
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
+    try {
+      await apiClient.put(`/users/${profileData.email}`, {
+        password: passwordData.newPassword,
+      });
+      alert("Đổi mật khẩu thành công!");
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error) {
+      alert("Đổi mật khẩu thất bại!");
+    }
   };
+
 
   return (
     <div className="space-y-6">

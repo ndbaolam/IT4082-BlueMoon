@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Edit, Trash2, Search, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import apiClient from "@/axiosConfig";
 
 interface NhanKhau {
   id: number;
@@ -30,139 +31,13 @@ interface PersonManagementProps {
 }
 
 export const PersonManagement = ({ userRole }: PersonManagementProps) => {
-  const [persons, setPersons] = useState<NhanKhau[]>([
-  {
-    "id": 1,
-    "hoten": "Nguyễn Văn A",
-    "ngaysinh": "1980-05-15",
-    "gioitinh": "Nam",
-    "dantoc": "Kinh",
-    "tongiao": "Không",
-    "cccd": "001234567890",
-    "ngaycap": "2020-01-01",
-    "noicap": "CA TP.HCM",
-    "nghenghiep": "Công nhân",
-    "ghichu": ""
-  },
-  {
-    "id": 2,
-    "hoten": "Trần Thị B",
-    "ngaysinh": "1985-08-20",
-    "gioitinh": "Nữ",
-    "dantoc": "Kinh",
-    "tongiao": "Phật giáo",
-    "cccd": "001234567891",
-    "ngaycap": "2020-02-15",
-    "noicap": "CA TP.HCM",
-    "nghenghiep": "Giáo viên",
-    "ghichu": ""
-  },
-  {
-    "id": 3,
-    "hoten": "Phạm Văn C",
-    "ngaysinh": "1990-03-10",
-    "gioitinh": "Nam",
-    "dantoc": "Kinh",
-    "tongiao": "Thiên Chúa",
-    "cccd": "001234567892",
-    "ngaycap": "2021-03-01",
-    "noicap": "CA Hà Nội",
-    "nghenghiep": "Tài xế",
-    "ghichu": ""
-  },
-  {
-    "id": 4,
-    "hoten": "Lê Thị D",
-    "ngaysinh": "1992-07-22",
-    "gioitinh": "Nữ",
-    "dantoc": "Kinh",
-    "tongiao": "Không",
-    "cccd": "001234567893",
-    "ngaycap": "2021-06-15",
-    "noicap": "CA Hà Nội",
-    "nghenghiep": "Nhân viên văn phòng",
-    "ghichu": ""
-  },
-  {
-    "id": 5,
-    "hoten": "Hoàng Văn E",
-    "ngaysinh": "1975-12-05",
-    "gioitinh": "Nam",
-    "dantoc": "Kinh",
-    "tongiao": "Phật giáo",
-    "cccd": "001234567894",
-    "ngaycap": "2019-11-20",
-    "noicap": "CA Hải Phòng",
-    "nghenghiep": "Bác sĩ",
-    "ghichu": ""
-  },
-  {
-    "id": 6,
-    "hoten": "Vũ Thị F",
-    "ngaysinh": "1988-09-13",
-    "gioitinh": "Nữ",
-    "dantoc": "Kinh",
-    "tongiao": "Không",
-    "cccd": "001234567895",
-    "ngaycap": "2020-04-10",
-    "noicap": "CA Đà Nẵng",
-    "nghenghiep": "Kế toán",
-    "ghichu": ""
-  },
-  {
-    "id": 7,
-    "hoten": "Đặng Văn G",
-    "ngaysinh": "1982-11-30",
-    "gioitinh": "Nam",
-    "dantoc": "Kinh",
-    "tongiao": "Thiên Chúa",
-    "cccd": "001234567896",
-    "ngaycap": "2021-08-18",
-    "noicap": "CA Cần Thơ",
-    "nghenghiep": "Kỹ sư",
-    "ghichu": ""
-  },
-  {
-    "id": 8,
-    "hoten": "Ngô Thị H",
-    "ngaysinh": "1995-06-25",
-    "gioitinh": "Nữ",
-    "dantoc": "Kinh",
-    "tongiao": "Không",
-    "cccd": "001234567897",
-    "ngaycap": "2022-02-02",
-    "noicap": "CA Hà Nội",
-    "nghenghiep": "Sinh viên",
-    "ghichu": ""
-  },
-  {
-    "id": 9,
-    "hoten": "Đoàn Văn I",
-    "ngaysinh": "1978-10-17",
-    "gioitinh": "Nam",
-    "dantoc": "Kinh",
-    "tongiao": "Phật giáo",
-    "cccd": "001234567898",
-    "ngaycap": "2018-05-25",
-    "noicap": "CA TP.HCM",
-    "nghenghiep": "Kinh doanh tự do",
-    "ghichu": ""
-  },
-  {
-    "id": 10,
-    "hoten": "Mai Thị K",
-    "ngaysinh": "1993-04-03",
-    "gioitinh": "Nữ",
-    "dantoc": "Kinh",
-    "tongiao": "Không",
-    "cccd": "001234567899",
-    "ngaycap": "2021-09-09",
-    "noicap": "CA Hà Nội",
-    "nghenghiep": "Thiết kế đồ họa",
-    "ghichu": ""
-  }
-]
-);
+  const [persons, setPersons] = useState<NhanKhau[]>([]);
+
+  useEffect(() => {
+    apiClient.get("/nhankhau")
+      .then(res => setPersons(res.data))
+      .catch(() => toast({ title: "Lỗi", description: "Không lấy được danh sách nhân khẩu" }));
+  }, []);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -188,33 +63,44 @@ export const PersonManagement = ({ userRole }: PersonManagementProps) => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    setPersons(persons.filter(p => p.id !== id));
-    toast({
-      title: "Thành công",
-      description: "Đã xóa nhân khẩu thành công",
-    });
+  const handleDelete =async (id: number) => {
+    try {
+      await apiClient.delete(`/nhankhau/${id}`);
+      setPersons(persons.filter(p => p.id !== id));
+      toast({
+        title: "Thành công",
+        description: "Đã xóa nhân khẩu thành công",
+      });
+    } catch {
+      toast({ title: "Lỗi", description: "Xóa nhân khẩu thất bại" });
+    }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (editingPerson) {
-      setPersons(persons.map(p => 
-        p.id === editingPerson.id ? { ...p, ...formData } : p
-      ));
-      toast({
-        title: "Thành công",
-        description: "Đã cập nhật nhân khẩu thành công",
-      });
+      //update
+      try {
+        const res = await apiClient.put(`/nhankhau/${editingPerson.id}`, formData);
+        setPersons(persons.map(p => p.id === editingPerson.id ? res.data : p));
+        toast({
+          title: "Thành công",
+          description: "Đã cập nhật nhân khẩu thành công",
+        });
+      } catch {
+        toast({ title: "Lỗi", description: "Cập nhật thất bại" });
+      }
     } else {
-      const newPerson = {
-        ...formData,
-        id: Math.max(...persons.map(p => p.id)) + 1,
-      } as NhanKhau;
-      setPersons([...persons, newPerson]);
-      toast({
-        title: "Thành công",
-        description: "Đã thêm nhân khẩu mới thành công",
-      });
+      //create new person
+      try {
+        const res = await apiClient.post("/nhankhau", formData);
+        setPersons([...persons, res.data]);
+        toast({
+          title: "Thành công",
+          description: "Đã thêm nhân khẩu mới thành công",
+        });
+      } catch {
+        toast({ title: "Lỗi", description: "Thêm mới thất bại" });
+      }
     }
     setIsDialogOpen(false);
     setFormData({});

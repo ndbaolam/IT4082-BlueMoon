@@ -31,9 +31,9 @@ export const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     try {
-      const response = await apiClient.post("/users/register", {        
+      const response = await apiClient.post("/users/register", {
         password: formData.password,
         vaitro: formData.vaitro,
         first_name: formData.first_name,
@@ -42,15 +42,19 @@ export const Login = () => {
         sodienthoai: formData.sodienthoai,
         diachi: formData.diachi,
       });
-  
-      if (response.status === 201) {
-        alert("Đăng ký thành công!");        
+
+      if (response.status === 201 || response.status === 200) {
+        alert("Đăng ký thành công!");
         setIsLogin(true);
       } else {
         alert("Đăng ký thất bại!");
       }
-    } catch (error) {
-      alert("Có lỗi xảy ra trong quá trình đăng ký!");
+    } catch (error: any) {
+      if (error.response && error.response.data && error.response.data.detail) {
+        alert("Lỗi: " + error.response.data.detail);
+      } else {
+        alert("Có lỗi xảy ra trong quá trình đăng ký!");
+      }
     }
   };
 

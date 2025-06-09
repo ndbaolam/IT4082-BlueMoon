@@ -1,20 +1,56 @@
-
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Home, DollarSign, FileText, TrendingUp, TrendingDown } from "lucide-react";
-
+import apiClient from "@/axiosConfig";
 interface DashboardProps {
   userRole: "to_truong" | "ke_toan";
 }
 
 export const Dashboard = ({ userRole }: DashboardProps) => {
-  const stats = {
-    totalHouseholds: 20,
-    totalPersons: 57,
-    totalRevenue: 125000000,
-    pendingPayments: 15,
-    monthlyGrowth: 5.2,
-    collectionRate: 87.5
-  };
+  const [stats, setStats] = useState({
+    totalHouseholds: 0,
+    totalPersons: 0,
+    totalRevenue: 0,
+    pendingPayments: 0,
+    monthlyGrowth: 0,
+    collectionRate: 0,
+  });
+
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Lấy tổng số hộ khẩu
+    apiClient.get("/hokhau/")
+      .then(res => setStats(prev => ({ ...prev, totalHouseholds: res.data.length })))
+      .catch(() => { });
+
+    // Lấy tổng số nhân khẩu
+    apiClient.get("/nhankhau/")
+      .then(res => setStats(prev => ({ ...prev, totalPersons: res.data.length })))
+      .catch(() => { });
+
+    // Lấy tổng thu nhập (tổng tiền đã thu)
+    apiClient.get("/noptien/")
+      .then(res => {
+        const totalRevenue = res.data.reduce((sum: number, nt: any) => sum + Number(nt.sotien || 0), 0);
+        setStats(prev => ({ ...prev, totalRevenue }));
+      })
+      .catch(() => { });
+
+    // Lấy hoạt động gần đây (ví dụ lấy 5 khoản thu mới nhất)
+    apiClient.get("/khoanthu/")
+      .then(res => {
+        const activities = res.data.slice(-5).reverse().map((item: any) => ({
+          id: item.id,
+          type: "khoanthu",
+          action: "Thêm khoản thu",
+          details: item.tenkhoanthu,
+          time: item.created_at || "",
+        }));
+        setRecentActivities(activities);
+      })
+      .catch(() => { });
+  }, []);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -22,51 +58,6 @@ export const Dashboard = ({ userRole }: DashboardProps) => {
       currency: 'VND'
     }).format(amount);
   };
-
-  const recentActivities = [
-    {
-      id: 1,
-      action: "Thêm hộ khẩu mới",
-      details: "HK003 - Nguyễn Văn C",
-      time: "2 giờ trước",
-      type: "household"
-    },
-    {
-      id: 2,
-      action: "Thu phí quản lý",
-      details: "500.000 VNĐ từ HK001",
-      time: "4 giờ trước",
-      type: "payment"
-    },
-    {
-      id: 3,
-      action: "Cập nhật nhân khẩu",
-      details: "Trần Thị B - Thay đổi nghề nghiệp",
-      time: "1 ngày trước",
-      type: "person"
-    },
-    {
-    "id": 4,
-    "action": "Tạm trú mới",
-    "details": "Nguyễn Văn D tại 45 Trần Duy Hưng, Hà Nội",
-    "time": "3 giờ trước",
-    "type": "temporary_residence"
-  },
-  {
-    "id": 5,
-    "action": "Xóa nhân khẩu",
-    "details": "Lê Văn E rời khỏi HK002",
-    "time": "6 giờ trước",
-    "type": "person"
-  },
-  {
-    "id": 6,
-    "action": "Thu phí bảo trì",
-    "details": "200.000 VNĐ từ HK003",
-    "time": "2 ngày trước",
-    "type": "payment"
-  }
-  ];
 
   return (
     <div className="space-y-8 p-8">
@@ -157,10 +148,9 @@ export const Dashboard = ({ userRole }: DashboardProps) => {
             <div className="space-y-4">
               {recentActivities.map((activity) => (
                 <div key={activity.id} className="flex items-center space-x-4 p-3 rounded-lg bg-gray-50/50">
-                  <div className={`w-2 h-2 rounded-full ${
-                    activity.type === 'household' ? 'bg-blue-500' :
+                  <div className={`w-2 h-2 rounded-full ${activity.type === 'household' ? 'bg-blue-500' :
                     activity.type === 'payment' ? 'bg-green-500' : 'bg-purple-500'
-                  }`} />
+                    }`} />
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">{activity.action}</p>
                     <p className="text-sm text-gray-600">{activity.details}</p>

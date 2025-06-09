@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Edit, Trash2, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import apiClient from "@/axiosConfig";
 
 interface HoKhau {
   id: number;
@@ -26,125 +26,35 @@ interface HouseholdManagementProps {
 }
 
 export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
-  const [households, setHouseholds] = useState<HoKhau[]>([
-  {
-    "id": 1,
-    "sohokhau": "HK001",
-    "sonha": "12A",
-    "duong": "Hoàng Hoa Thám",
-    "phuong": "Phường Ngọc Hà",
-    "quan": "Ba Đình",
-    "ngaylamhokhau": "2023-01-15",
-    "chu_ho_id": 1,
-    "chu_ho_name": "Nguyễn Văn A"
-  },
-  {
-    "id": 2,
-    "sohokhau": "HK002",
-    "sonha": "45",
-    "duong": "Kim Mã",
-    "phuong": "Phường Kim Mã",
-    "quan": "Ba Đình",
-    "ngaylamhokhau": "2023-02-20",
-    "chu_ho_id": 2,
-    "chu_ho_name": "Trần Thị B"
-  },
-  {
-    "id": 3,
-    "sohokhau": "HK003",
-    "sonha": "89B",
-    "duong": "Giải Phóng",
-    "phuong": "Phường Đồng Tâm",
-    "quan": "Hai Bà Trưng",
-    "ngaylamhokhau": "2023-03-12",
-    "chu_ho_id": 3,
-    "chu_ho_name": "Phạm Văn C"
-  },
-  {
-    "id": 4,
-    "sohokhau": "HK004",
-    "sonha": "22",
-    "duong": "Xã Đàn",
-    "phuong": "Phường Nam Đồng",
-    "quan": "Đống Đa",
-    "ngaylamhokhau": "2023-04-10",
-    "chu_ho_id": 4,
-    "chu_ho_name": "Lê Thị D"
-  },
-  {
-    "id": 5,
-    "sohokhau": "HK005",
-    "sonha": "10C",
-    "duong": "Láng Hạ",
-    "phuong": "Phường Láng Hạ",
-    "quan": "Đống Đa",
-    "ngaylamhokhau": "2023-05-05",
-    "chu_ho_id": 5,
-    "chu_ho_name": "Hoàng Văn E"
-  },
-  {
-    "id": 6,
-    "sohokhau": "HK006",
-    "sonha": "305",
-    "duong": "Cầu Giấy",
-    "phuong": "Phường Quan Hoa",
-    "quan": "Cầu Giấy",
-    "ngaylamhokhau": "2023-06-18",
-    "chu_ho_id": 6,
-    "chu_ho_name": "Vũ Thị F"
-  },
-  {
-    "id": 7,
-    "sohokhau": "HK007",
-    "sonha": "78",
-    "duong": "Trần Duy Hưng",
-    "phuong": "Phường Trung Hòa",
-    "quan": "Cầu Giấy",
-    "ngaylamhokhau": "2023-07-02",
-    "chu_ho_id": 7,
-    "chu_ho_name": "Đặng Văn G"
-  },
-  {
-    "id": 8,
-    "sohokhau": "HK008",
-    "sonha": "18",
-    "duong": "Nguyễn Chí Thanh",
-    "phuong": "Phường Láng Thượng",
-    "quan": "Đống Đa",
-    "ngaylamhokhau": "2023-08-09",
-    "chu_ho_id": 8,
-    "chu_ho_name": "Ngô Thị H"
-  },
-  {
-    "id": 9,
-    "sohokhau": "HK009",
-    "sonha": "99",
-    "duong": "Phạm Văn Đồng",
-    "phuong": "Phường Mai Dịch",
-    "quan": "Cầu Giấy",
-    "ngaylamhokhau": "2023-09-14",
-    "chu_ho_id": 9,
-    "chu_ho_name": "Đoàn Văn I"
-  },
-  {
-    "id": 10,
-    "sohokhau": "HK010",
-    "sonha": "65",
-    "duong": "Lê Đức Thọ",
-    "phuong": "Phường Mỹ Đình 2",
-    "quan": "Nam Từ Liêm",
-    "ngaylamhokhau": "2023-10-01",
-    "chu_ho_id": 10,
-    "chu_ho_name": "Mai Thị K"
-  }
-]
-);
+  const [households, setHouseholds] = useState<HoKhau[]>([]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingHousehold, setEditingHousehold] = useState<HoKhau | null>(null);
   const [formData, setFormData] = useState<Partial<HoKhau>>({});
   const { toast } = useToast();
+
+  useEffect(() => {
+    Promise.all([
+      apiClient.get("/hokhau"),
+      apiClient.get("/nhankhau")
+    ])
+      .then(([resHoKhau, resNhanKhau]) => {
+        // Map chu_ho_id -> hoten
+        const nhanKhauMap = new Map<number, string>();
+        resNhanKhau.data.forEach((nk: any) => {
+          nhanKhauMap.set(nk.id, nk.hoten || `Nhân khẩu ${nk.id}`);
+        });
+
+        const householdsWithChuHoName = resHoKhau.data.map((hk: any) => ({
+          ...hk,
+          chu_ho_name: nhanKhauMap.get(hk.chu_ho_id) || `ID ${hk.chu_ho_id}`,
+        }));
+
+        setHouseholds(householdsWithChuHoName);
+      })
+      .catch(() => toast({ title: "Lỗi", description: "Không lấy được danh sách hộ khẩu hoặc nhân khẩu" }));
+  }, []);
 
   const filteredHouseholds = households.filter(household =>
     household.sohokhau.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -164,33 +74,44 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    setHouseholds(households.filter(h => h.id !== id));
-    toast({
-      title: "Thành công",
-      description: "Đã xóa hộ khẩu thành công",
-    });
+  const handleDelete = async (id: number) => {
+    try {
+      await apiClient.delete(`/hokhau/${id}`);
+      setHouseholds(households.filter(h => h.id !== id));
+      toast({
+        title: "Thành công",
+        description: "Đã xóa hộ khẩu thành công",
+      });
+    } catch {
+      toast({ title: "Lỗi", description: "Xóa hộ khẩu thất bại" });
+    }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (editingHousehold) {
-      setHouseholds(households.map(h => 
-        h.id === editingHousehold.id ? { ...h, ...formData } : h
-      ));
-      toast({
-        title: "Thành công",
-        description: "Đã cập nhật hộ khẩu thành công",
-      });
+      // Update
+      try {
+        const res = await apiClient.put(`/hokhau/${editingHousehold.id}`, formData);
+        setHouseholds(households.map(h => h.id === editingHousehold.id ? res.data : h));
+        toast({
+          title: "Thành công",
+          description: "Đã cập nhật hộ khẩu thành công",
+        });
+      } catch {
+        toast({ title: "Lỗi", description: "Cập nhật thất bại" });
+      }
     } else {
-      const newHousehold = {
-        ...formData,
-        id: Math.max(...households.map(h => h.id)) + 1,
-      } as HoKhau;
-      setHouseholds([...households, newHousehold]);
-      toast({
-        title: "Thành công",
-        description: "Đã thêm hộ khẩu mới thành công",
-      });
+      // Create
+      try {
+        const res = await apiClient.post("/hokhau", formData);
+        setHouseholds([...households, res.data]);
+        toast({
+          title: "Thành công",
+          description: "Đã thêm hộ khẩu mới thành công",
+        });
+      } catch {
+        toast({ title: "Lỗi", description: "Thêm mới thất bại" });
+      }
     }
     setIsDialogOpen(false);
     setFormData({});
@@ -291,7 +212,7 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
                 <Input
                   id="sohokhau"
                   value={formData.sohokhau || ""}
-                  onChange={(e) => setFormData({...formData, sohokhau: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, sohokhau: e.target.value })}
                   placeholder="Nhập số hộ khẩu"
                 />
               </div>
@@ -300,7 +221,7 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
                 <Input
                   id="sonha"
                   value={formData.sonha || ""}
-                  onChange={(e) => setFormData({...formData, sonha: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, sonha: e.target.value })}
                   placeholder="Số nhà"
                 />
               </div>
@@ -309,7 +230,7 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
                 <Input
                   id="duong"
                   value={formData.duong || ""}
-                  onChange={(e) => setFormData({...formData, duong: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, duong: e.target.value })}
                   placeholder="Tên đường"
                 />
               </div>
@@ -318,7 +239,7 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
                 <Input
                   id="phuong"
                   value={formData.phuong || ""}
-                  onChange={(e) => setFormData({...formData, phuong: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, phuong: e.target.value })}
                   placeholder="Tên phường"
                 />
               </div>
@@ -327,7 +248,7 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
                 <Input
                   id="quan"
                   value={formData.quan || ""}
-                  onChange={(e) => setFormData({...formData, quan: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, quan: e.target.value })}
                   placeholder="Tên quận"
                 />
               </div>
@@ -337,7 +258,7 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
                   id="ngaylamhokhau"
                   type="date"
                   value={formData.ngaylamhokhau || ""}
-                  onChange={(e) => setFormData({...formData, ngaylamhokhau: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, ngaylamhokhau: e.target.value })}
                 />
               </div>
             </div>
