@@ -28,27 +28,58 @@ interface UserManagementProps {
 
 export const UserManagement = ({ userRole }: UserManagementProps) => {
   const [users, setUsers] = useState<User[]>([
-    {
-      id: 1,
-      username: "admin",
-      email: "admin@todan.vn",
-      role: "to_truong",
-      fullName: "Nguyễn Văn Tài",
-      phone: "0123456789",
-      status: "active",
-      createdAt: "2024-01-15"
-    },
-    {
-      id: 2,
-      username: "ketoan",
-      email: "ketoan@todan.vn",
-      role: "ke_toan",
-      fullName: "Trần Thị Hoa",
-      phone: "0987654321",
-      status: "active",
-      createdAt: "2024-01-20"
-    }
-  ]);
+  {
+    "id": 3,
+    "username": "ketoan2",
+    "email": "ketoan2@todan.vn",
+    "role": "ke_toan",
+    "fullName": "Nguyễn Thị Hằng",
+    "phone": "0911223344",
+    "status": "active",
+    "createdAt": "2025-01-25"
+  },
+  {
+    "id": 4,
+    "username": "ketoan3",
+    "email": "ketoan3@todan.vn",
+    "role": "ke_toan",
+    "fullName": "Lê Văn Tài",
+    "phone": "0922334455",
+    "status": "active",
+    "createdAt": "2025-01-28"
+  },
+  {
+    "id": 5,
+    "username": "ketoan4",
+    "email": "ketoan4@todan.vn",
+    "role": "ke_toan",
+    "fullName": "Phạm Thị Minh",
+    "phone": "0933445566",
+    "status": "inactive",
+    "createdAt": "2025-02-02"
+  },
+  {
+    "id": 6,
+    "username": "ketoan5",
+    "email": "ketoan5@todan.vn",
+    "role": "ke_toan",
+    "fullName": "Trần Văn Long",
+    "phone": "0944556677",
+    "status": "active",
+    "createdAt": "2025-02-10"
+  },
+  {
+    "id": 7,
+    "username": "ketoan6",
+    "email": "ketoan6@todan.vn",
+    "role": "ke_toan",
+    "fullName": "Vũ Thị Lan",
+    "phone": "0955667788",
+    "status": "active",
+    "createdAt": "2025-02-15"
+  }
+]
+);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);

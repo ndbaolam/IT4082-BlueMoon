@@ -27,29 +27,118 @@ interface HouseholdManagementProps {
 
 export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
   const [households, setHouseholds] = useState<HoKhau[]>([
-    {
-      id: 1,
-      sohokhau: "HK001",
-      sonha: "123",
-      duong: "Nguyễn Trãi",
-      phuong: "Phường 1",
-      quan: "Quận 1",
-      ngaylamhokhau: "2023-01-15",
-      chu_ho_id: 1,
-      chu_ho_name: "Nguyễn Văn A"
-    },
-    {
-      id: 2,
-      sohokhau: "HK002",
-      sonha: "456",
-      duong: "Lê Lợi",
-      phuong: "Phường 2",
-      quan: "Quận 1",
-      ngaylamhokhau: "2023-02-20",
-      chu_ho_id: 2,
-      chu_ho_name: "Trần Thị B"
-    }
-  ]);
+  {
+    "id": 1,
+    "sohokhau": "HK001",
+    "sonha": "12A",
+    "duong": "Hoàng Hoa Thám",
+    "phuong": "Phường Ngọc Hà",
+    "quan": "Ba Đình",
+    "ngaylamhokhau": "2023-01-15",
+    "chu_ho_id": 1,
+    "chu_ho_name": "Nguyễn Văn A"
+  },
+  {
+    "id": 2,
+    "sohokhau": "HK002",
+    "sonha": "45",
+    "duong": "Kim Mã",
+    "phuong": "Phường Kim Mã",
+    "quan": "Ba Đình",
+    "ngaylamhokhau": "2023-02-20",
+    "chu_ho_id": 2,
+    "chu_ho_name": "Trần Thị B"
+  },
+  {
+    "id": 3,
+    "sohokhau": "HK003",
+    "sonha": "89B",
+    "duong": "Giải Phóng",
+    "phuong": "Phường Đồng Tâm",
+    "quan": "Hai Bà Trưng",
+    "ngaylamhokhau": "2023-03-12",
+    "chu_ho_id": 3,
+    "chu_ho_name": "Phạm Văn C"
+  },
+  {
+    "id": 4,
+    "sohokhau": "HK004",
+    "sonha": "22",
+    "duong": "Xã Đàn",
+    "phuong": "Phường Nam Đồng",
+    "quan": "Đống Đa",
+    "ngaylamhokhau": "2023-04-10",
+    "chu_ho_id": 4,
+    "chu_ho_name": "Lê Thị D"
+  },
+  {
+    "id": 5,
+    "sohokhau": "HK005",
+    "sonha": "10C",
+    "duong": "Láng Hạ",
+    "phuong": "Phường Láng Hạ",
+    "quan": "Đống Đa",
+    "ngaylamhokhau": "2023-05-05",
+    "chu_ho_id": 5,
+    "chu_ho_name": "Hoàng Văn E"
+  },
+  {
+    "id": 6,
+    "sohokhau": "HK006",
+    "sonha": "305",
+    "duong": "Cầu Giấy",
+    "phuong": "Phường Quan Hoa",
+    "quan": "Cầu Giấy",
+    "ngaylamhokhau": "2023-06-18",
+    "chu_ho_id": 6,
+    "chu_ho_name": "Vũ Thị F"
+  },
+  {
+    "id": 7,
+    "sohokhau": "HK007",
+    "sonha": "78",
+    "duong": "Trần Duy Hưng",
+    "phuong": "Phường Trung Hòa",
+    "quan": "Cầu Giấy",
+    "ngaylamhokhau": "2023-07-02",
+    "chu_ho_id": 7,
+    "chu_ho_name": "Đặng Văn G"
+  },
+  {
+    "id": 8,
+    "sohokhau": "HK008",
+    "sonha": "18",
+    "duong": "Nguyễn Chí Thanh",
+    "phuong": "Phường Láng Thượng",
+    "quan": "Đống Đa",
+    "ngaylamhokhau": "2023-08-09",
+    "chu_ho_id": 8,
+    "chu_ho_name": "Ngô Thị H"
+  },
+  {
+    "id": 9,
+    "sohokhau": "HK009",
+    "sonha": "99",
+    "duong": "Phạm Văn Đồng",
+    "phuong": "Phường Mai Dịch",
+    "quan": "Cầu Giấy",
+    "ngaylamhokhau": "2023-09-14",
+    "chu_ho_id": 9,
+    "chu_ho_name": "Đoàn Văn I"
+  },
+  {
+    "id": 10,
+    "sohokhau": "HK010",
+    "sonha": "65",
+    "duong": "Lê Đức Thọ",
+    "phuong": "Phường Mỹ Đình 2",
+    "quan": "Nam Từ Liêm",
+    "ngaylamhokhau": "2023-10-01",
+    "chu_ho_id": 10,
+    "chu_ho_name": "Mai Thị K"
+  }
+]
+);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);

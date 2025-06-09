@@ -45,7 +45,19 @@ export const Reports = ({ userRole }: ReportsProps) => {
       type: "Thu phí",
       date: "2024-10-01",
       status: "Hoàn thành"
-    }
+    },
+    {
+    "name": "Báo cáo thu chi tháng 10/2024",
+    "type": "Tài chính",
+    "date": "2024-11-01",
+    "status": "Hoàn thành"
+  },
+  {
+    "name": "Báo cáo biến đổi nhân khẩu Q3/2024",
+    "type": "Nhân khẩu",
+    "date": "2024-10-15",
+    "status": "Hoàn thành"
+  },    
   ];
 
   return (
@@ -71,6 +83,7 @@ export const Reports = ({ userRole }: ReportsProps) => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="2024">2025</SelectItem>
               <SelectItem value="2024">2024</SelectItem>
               <SelectItem value="2023">2023</SelectItem>
               <SelectItem value="2022">2022</SelectItem>
@@ -111,7 +124,7 @@ export const Reports = ({ userRole }: ReportsProps) => {
             </div>
             <div className="flex items-center text-xs text-blue-600">
               <TrendingUp className="w-3 h-3 mr-1" />
-              +3 hộ mới trong tháng
+              +5 hộ mới trong tháng
             </div>
           </CardContent>
         </Card>

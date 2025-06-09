@@ -8,8 +8,8 @@ interface DashboardProps {
 
 export const Dashboard = ({ userRole }: DashboardProps) => {
   const stats = {
-    totalHouseholds: 245,
-    totalPersons: 892,
+    totalHouseholds: 20,
+    totalPersons: 57,
     totalRevenue: 125000000,
     pendingPayments: 15,
     monthlyGrowth: 5.2,
@@ -44,7 +44,28 @@ export const Dashboard = ({ userRole }: DashboardProps) => {
       details: "Trần Thị B - Thay đổi nghề nghiệp",
       time: "1 ngày trước",
       type: "person"
-    }
+    },
+    {
+    "id": 4,
+    "action": "Tạm trú mới",
+    "details": "Nguyễn Văn D tại 45 Trần Duy Hưng, Hà Nội",
+    "time": "3 giờ trước",
+    "type": "temporary_residence"
+  },
+  {
+    "id": 5,
+    "action": "Xóa nhân khẩu",
+    "details": "Lê Văn E rời khỏi HK002",
+    "time": "6 giờ trước",
+    "type": "person"
+  },
+  {
+    "id": 6,
+    "action": "Thu phí bảo trì",
+    "details": "200.000 VNĐ từ HK003",
+    "time": "2 ngày trước",
+    "type": "payment"
+  }
   ];
 
   return (

@@ -56,7 +56,107 @@ export const PaymentManagement = ({ userRole }: PaymentManagementProps) => {
       ngaynop: "2024-02-01",
       hokhau_name: "HK001",
       khoanthu_name: "Phí bảo trì thang máy"
-    }
+    },
+    {
+    "id": 4,
+    "hokhau_id": 2,
+    "khoanthu_id": 2,
+    "nguoinop": "Trần Thị B",
+    "sotien": 200000,
+    "ngaynop": "2024-02-05",
+    "hokhau_name": "HK002",
+    "khoanthu_name": "Phí bảo trì thang máy"
+  },
+  {
+    "id": 5,
+    "hokhau_id": 3,
+    "khoanthu_id": 1,
+    "nguoinop": "Phạm Văn C",
+    "sotien": 500000,
+    "ngaynop": "2024-02-10",
+    "hokhau_name": "HK003",
+    "khoanthu_name": "Phí quản lý chung cư"
+  },
+  {
+    "id": 6,
+    "hokhau_id": 3,
+    "khoanthu_id": 3,
+    "nguoinop": "Phạm Văn C",
+    "sotien": 100000,
+    "ngaynop": "2024-02-12",
+    "hokhau_name": "HK003",
+    "khoanthu_name": "Phí gửi xe máy"
+  },
+  {
+    "id": 7,
+    "hokhau_id": 4,
+    "khoanthu_id": 1,
+    "nguoinop": "Lê Thị D",
+    "sotien": 500000,
+    "ngaynop": "2024-03-01",
+    "hokhau_name": "HK004",
+    "khoanthu_name": "Phí quản lý chung cư"
+  },
+  {
+    "id": 8,
+    "hokhau_id": 4,
+    "khoanthu_id": 2,
+    "nguoinop": "Lê Thị D",
+    "sotien": 200000,
+    "ngaynop": "2024-03-05",
+    "hokhau_name": "HK004",
+    "khoanthu_name": "Phí bảo trì thang máy"
+  },
+  {
+    "id": 9,
+    "hokhau_id": 5,
+    "khoanthu_id": 1,
+    "nguoinop": "Hoàng Văn E",
+    "sotien": 500000,
+    "ngaynop": "2024-03-10",
+    "hokhau_name": "HK005",
+    "khoanthu_name": "Phí quản lý chung cư"
+  },
+  {
+    "id": 10,
+    "hokhau_id": 5,
+    "khoanthu_id": 3,
+    "nguoinop": "Hoàng Văn E",
+    "sotien": 100000,
+    "ngaynop": "2024-03-15",
+    "hokhau_name": "HK005",
+    "khoanthu_name": "Phí gửi xe máy"
+  },
+  {
+    "id": 11,
+    "hokhau_id": 1,
+    "khoanthu_id": 4,
+    "nguoinop": "Nguyễn Văn A",
+    "sotien": 150000,
+    "ngaynop": "2024-03-20",
+    "hokhau_name": "HK001",
+    "khoanthu_name": "Phí vệ sinh"
+  },
+  {
+    "id": 12,
+    "hokhau_id": 2,
+    "khoanthu_id": 3,
+    "nguoinop": "Trần Thị B",
+    "sotien": 100000,
+    "ngaynop": "2024-03-22",
+    "hokhau_name": "HK002",
+    "khoanthu_name": "Phí gửi xe máy"
+  },
+  {
+    "id": 13,
+    "hokhau_id": 3,
+    "khoanthu_id": 4,
+    "nguoinop": "Phạm Văn C",
+    "sotien": 150000,
+    "ngaynop": "2024-03-25",
+    "hokhau_name": "HK003",
+    "khoanthu_name": "Phí vệ sinh"
+  }
   ]);
 
   const [searchTerm, setSearchTerm] = useState("");

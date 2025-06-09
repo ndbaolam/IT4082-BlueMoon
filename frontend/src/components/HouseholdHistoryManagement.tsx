@@ -53,7 +53,52 @@ export const HouseholdHistoryManagement = ({ userRole }: HouseholdHistoryManagem
       thoigian: "2024-02-01T09:00:00",
       hokhau_name: "HK002",
       nhankhau_name: "Lê Văn C"
-    }
+    },
+    {
+    "id": 4,
+    "hokhau_id": 2,
+    "nhankhau_id": 4,
+    "loaithaydoi": 1,
+    "thoigian": "2024-02-10T08:45:00",
+    "hokhau_name": "HK002",
+    "nhankhau_name": "Phạm Thị D"
+  },
+  {
+    "id": 5,
+    "hokhau_id": 1,
+    "nhankhau_id": 5,
+    "loaithaydoi": 2,
+    "thoigian": "2024-02-15T11:20:00",
+    "hokhau_name": "HK001",
+    "nhankhau_name": "Hoàng Văn E"
+  },
+  {
+    "id": 6,
+    "hokhau_id": 3,
+    "nhankhau_id": 6,
+    "loaithaydoi": 1,
+    "thoigian": "2024-03-01T10:00:00",
+    "hokhau_name": "HK003",
+    "nhankhau_name": "Nguyễn Thị F"
+  },
+  {
+    "id": 7,
+    "hokhau_id": 3,
+    "nhankhau_id": 7,
+    "loaithaydoi": 2,
+    "thoigian": "2024-03-05T13:30:00",
+    "hokhau_name": "HK003",
+    "nhankhau_name": "Trần Văn G"
+  },
+  {
+    "id": 8,
+    "hokhau_id": 2,
+    "nhankhau_id": 8,
+    "loaithaydoi": 1,
+    "thoigian": "2024-03-10T15:10:00",
+    "hokhau_name": "HK002",
+    "nhankhau_name": "Lê Thị H"
+  }
   ]);
 
   const [searchTerm, setSearchTerm] = useState("");

@@ -31,33 +31,138 @@ interface PersonManagementProps {
 
 export const PersonManagement = ({ userRole }: PersonManagementProps) => {
   const [persons, setPersons] = useState<NhanKhau[]>([
-    {
-      id: 1,
-      hoten: "Nguyễn Văn A",
-      ngaysinh: "1980-05-15",
-      gioitinh: "Nam",
-      dantoc: "Kinh",
-      tongiao: "Không",
-      cccd: "001234567890",
-      ngaycap: "2020-01-01",
-      noicap: "CA TP.HCM",
-      nghenghiep: "Công nhân",
-      ghichu: ""
-    },
-    {
-      id: 2,
-      hoten: "Trần Thị B",
-      ngaysinh: "1985-08-20",
-      gioitinh: "Nữ",
-      dantoc: "Kinh",
-      tongiao: "Phật giáo",
-      cccd: "001234567891",
-      ngaycap: "2020-02-15",
-      noicap: "CA TP.HCM",
-      nghenghiep: "Giáo viên",
-      ghichu: ""
-    }
-  ]);
+  {
+    "id": 1,
+    "hoten": "Nguyễn Văn A",
+    "ngaysinh": "1980-05-15",
+    "gioitinh": "Nam",
+    "dantoc": "Kinh",
+    "tongiao": "Không",
+    "cccd": "001234567890",
+    "ngaycap": "2020-01-01",
+    "noicap": "CA TP.HCM",
+    "nghenghiep": "Công nhân",
+    "ghichu": ""
+  },
+  {
+    "id": 2,
+    "hoten": "Trần Thị B",
+    "ngaysinh": "1985-08-20",
+    "gioitinh": "Nữ",
+    "dantoc": "Kinh",
+    "tongiao": "Phật giáo",
+    "cccd": "001234567891",
+    "ngaycap": "2020-02-15",
+    "noicap": "CA TP.HCM",
+    "nghenghiep": "Giáo viên",
+    "ghichu": ""
+  },
+  {
+    "id": 3,
+    "hoten": "Phạm Văn C",
+    "ngaysinh": "1990-03-10",
+    "gioitinh": "Nam",
+    "dantoc": "Kinh",
+    "tongiao": "Thiên Chúa",
+    "cccd": "001234567892",
+    "ngaycap": "2021-03-01",
+    "noicap": "CA Hà Nội",
+    "nghenghiep": "Tài xế",
+    "ghichu": ""
+  },
+  {
+    "id": 4,
+    "hoten": "Lê Thị D",
+    "ngaysinh": "1992-07-22",
+    "gioitinh": "Nữ",
+    "dantoc": "Kinh",
+    "tongiao": "Không",
+    "cccd": "001234567893",
+    "ngaycap": "2021-06-15",
+    "noicap": "CA Hà Nội",
+    "nghenghiep": "Nhân viên văn phòng",
+    "ghichu": ""
+  },
+  {
+    "id": 5,
+    "hoten": "Hoàng Văn E",
+    "ngaysinh": "1975-12-05",
+    "gioitinh": "Nam",
+    "dantoc": "Kinh",
+    "tongiao": "Phật giáo",
+    "cccd": "001234567894",
+    "ngaycap": "2019-11-20",
+    "noicap": "CA Hải Phòng",
+    "nghenghiep": "Bác sĩ",
+    "ghichu": ""
+  },
+  {
+    "id": 6,
+    "hoten": "Vũ Thị F",
+    "ngaysinh": "1988-09-13",
+    "gioitinh": "Nữ",
+    "dantoc": "Kinh",
+    "tongiao": "Không",
+    "cccd": "001234567895",
+    "ngaycap": "2020-04-10",
+    "noicap": "CA Đà Nẵng",
+    "nghenghiep": "Kế toán",
+    "ghichu": ""
+  },
+  {
+    "id": 7,
+    "hoten": "Đặng Văn G",
+    "ngaysinh": "1982-11-30",
+    "gioitinh": "Nam",
+    "dantoc": "Kinh",
+    "tongiao": "Thiên Chúa",
+    "cccd": "001234567896",
+    "ngaycap": "2021-08-18",
+    "noicap": "CA Cần Thơ",
+    "nghenghiep": "Kỹ sư",
+    "ghichu": ""
+  },
+  {
+    "id": 8,
+    "hoten": "Ngô Thị H",
+    "ngaysinh": "1995-06-25",
+    "gioitinh": "Nữ",
+    "dantoc": "Kinh",
+    "tongiao": "Không",
+    "cccd": "001234567897",
+    "ngaycap": "2022-02-02",
+    "noicap": "CA Hà Nội",
+    "nghenghiep": "Sinh viên",
+    "ghichu": ""
+  },
+  {
+    "id": 9,
+    "hoten": "Đoàn Văn I",
+    "ngaysinh": "1978-10-17",
+    "gioitinh": "Nam",
+    "dantoc": "Kinh",
+    "tongiao": "Phật giáo",
+    "cccd": "001234567898",
+    "ngaycap": "2018-05-25",
+    "noicap": "CA TP.HCM",
+    "nghenghiep": "Kinh doanh tự do",
+    "ghichu": ""
+  },
+  {
+    "id": 10,
+    "hoten": "Mai Thị K",
+    "ngaysinh": "1993-04-03",
+    "gioitinh": "Nữ",
+    "dantoc": "Kinh",
+    "tongiao": "Không",
+    "cccd": "001234567899",
+    "ngaycap": "2021-09-09",
+    "noicap": "CA Hà Nội",
+    "nghenghiep": "Thiết kế đồ họa",
+    "ghichu": ""
+  }
+]
+);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);

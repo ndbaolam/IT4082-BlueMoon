@@ -28,34 +28,53 @@ interface TemporaryResidenceManagementProps {
 
 export const TemporaryResidenceManagement = ({ userRole }: TemporaryResidenceManagementProps) => {
   const [residences, setResidences] = useState<TamTruTamVang[]>([
-    {
-      id: 1,
-      nhankhau_id: 1,
-      trangthai: "tạm trú",
-      diachitamtrutamvang: "123 Nguyễn Văn Cừ, Q.5, TP.HCM",
-      thoigian: "2024-01-15",
-      noidungdenghi: "Về thăm gia đình dịp Tết",
-      nhankhau_name: "Nguyễn Văn A"
-    },
-    {
-      id: 2,
-      nhankhau_id: 2,
-      trangthai: "tạm vắng",
-      diachitamtrutamvang: "456 Lê Lai, Hà Nội",
-      thoigian: "2024-02-01",
-      noidungdenghi: "Công tác dài hạn tại Hà Nội",
-      nhankhau_name: "Trần Thị B"
-    },
-    {
-      id: 3,
-      nhankhau_id: 3,
-      trangthai: "tạm trú",
-      diachitamtrutamvang: "789 Trần Hưng Đạo, Q.1, TP.HCM",
-      thoigian: "2024-02-10",
-      noidungdenghi: "Thuê trọ học tập",
-      nhankhau_name: "Lê Văn C"
-    }
-  ]);
+  {
+    "id": 4,
+    "nhankhau_id": 4,
+    "trangthai": "tạm trú",
+    "diachitamtrutamvang": "12 Phạm Hùng, Nam Từ Liêm, Hà Nội",
+    "thoigian": "2024-03-05",
+    "noidungdenghi": "Công tác 3 tháng",
+    "nhankhau_name": "Phạm Thị D"
+  },
+  {
+    "id": 5,
+    "nhankhau_id": 5,
+    "trangthai": "tạm vắng",
+    "diachitamtrutamvang": "88 Kim Mã, Ba Đình, Hà Nội",
+    "thoigian": "2024-03-12",
+    "noidungdenghi": "Chăm sóc người thân",
+    "nhankhau_name": "Hoàng Văn E"
+  },
+  {
+    "id": 6,
+    "nhankhau_id": 6,
+    "trangthai": "tạm trú",
+    "diachitamtrutamvang": "32 Trần Duy Hưng, Cầu Giấy, Hà Nội",
+    "thoigian": "2024-03-20",
+    "noidungdenghi": "Thực tập tại công ty",
+    "nhankhau_name": "Nguyễn Thị F"
+  },
+  {
+    "id": 7,
+    "nhankhau_id": 7,
+    "trangthai": "tạm vắng",
+    "diachitamtrutamvang": "25 Giảng Võ, Đống Đa, Hà Nội",
+    "thoigian": "2024-03-25",
+    "noidungdenghi": "Về quê giải quyết việc cá nhân",
+    "nhankhau_name": "Trần Văn G"
+  },
+  {
+    "id": 8,
+    "nhankhau_id": 8,
+    "trangthai": "tạm trú",
+    "diachitamtrutamvang": "59 Láng Hạ, Ba Đình, Hà Nội",
+    "thoigian": "2024-04-01",
+    "noidungdenghi": "Chuyển đến sống với người thân",
+    "nhankhau_name": "Lê Thị H"
+  }
+]
+);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");

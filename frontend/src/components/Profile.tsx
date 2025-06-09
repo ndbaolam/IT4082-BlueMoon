@@ -37,7 +37,7 @@ export const Profile = ({ userRole }: ProfileProps) => {
           fullName: `${data.first_name} ${data.last_name}`,
           email: `${data.username}@example.com`, // Assuming email is derived from username
           phone: "0123456789", // Replace with actual phone if available
-          address: "123 Nguyễn Trãi, Quận 1, TP.HCM", // Replace with actual address if available
+          address: "123 Trần đại Nghĩa, Hai Bà Trưng, Hà Nội", // Replace with actual address if available
           joinDate: new Date(data.created_at).toLocaleDateString("vi-VN"),
         });
       })
