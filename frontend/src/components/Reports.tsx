@@ -1,10 +1,8 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileText, Download, TrendingUp, TrendingDown, DollarSign, Users } from "lucide-react";
 import { useState } from "react";
-
 interface ReportsProps {
   userRole: "to_truong" | "ke_toan";
 }

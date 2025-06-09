@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, Search, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import apiClient from "@/axiosConfig";
 
 interface KhoanThu {
   id: number;
@@ -26,38 +27,19 @@ interface FeeManagementProps {
 }
 
 export const FeeManagement = ({ userRole }: FeeManagementProps) => {
-  const [fees, setFees] = useState<KhoanThu[]>([
-    {
-      id: 1,
-      ngaytao: "2024-01-01",
-      thoihan: "2024-12-31",
-      tenkhoanthu: "Phí quản lý chung cư",
-      batbuoc: true,
-      ghichu: "Thu hàng tháng"
-    },
-    {
-      id: 2,
-      ngaytao: "2024-01-15",
-      thoihan: "2024-06-30",
-      tenkhoanthu: "Phí bảo trì thang máy",
-      batbuoc: false,
-      ghichu: "Thu theo quý"
-    },
-    {
-      id: 3,
-      ngaytao: "2024-02-01",
-      thoihan: "2024-12-31",
-      tenkhoanthu: "Phí an ninh",
-      batbuoc: true,
-      ghichu: "Thu hàng tháng, bắt buộc cho tất cả hộ"
-    }
-  ]);
+  const [fees, setFees] = useState<KhoanThu[]>([]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFee, setEditingFee] = useState<KhoanThu | null>(null);
   const [formData, setFormData] = useState<Partial<KhoanThu>>({});
   const { toast } = useToast();
+
+  useEffect(() => {
+    apiClient.get("/khoanthu")
+      .then(res => setFees(res.data))
+      .catch(() => toast({ title: "Lỗi", description: "Không lấy được danh sách khoản thu" }));
+  }, []);
 
   const filteredFees = fees.filter(fee =>
     fee.tenkhoanthu.toLowerCase().includes(searchTerm.toLowerCase())
@@ -75,34 +57,44 @@ export const FeeManagement = ({ userRole }: FeeManagementProps) => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    setFees(fees.filter(f => f.id !== id));
-    toast({
-      title: "Thành công",
-      description: "Đã xóa khoản thu thành công",
-    });
+  const handleDelete = async (id: number) => {
+    try {
+      await apiClient.delete(`/khoanthu/${id}`);
+      setFees(fees.filter(f => f.id !== id));
+      toast({
+        title: "Thành công",
+        description: "Đã xóa khoản thu thành công",
+      });
+    } catch {
+      toast({ title: "Lỗi", description: "Xóa khoản thu thất bại" });
+    }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (editingFee) {
-      setFees(fees.map(f => 
-        f.id === editingFee.id ? { ...f, ...formData } : f
-      ));
-      toast({
-        title: "Thành công",
-        description: "Đã cập nhật khoản thu thành công",
-      });
+      // Update
+      try {
+        const res = await apiClient.put(`/khoanthu/${editingFee.id}`, formData);
+        setFees(fees.map(f => f.id === editingFee.id ? res.data : f));
+        toast({
+          title: "Thành công",
+          description: "Đã cập nhật khoản thu thành công",
+        });
+      } catch {
+        toast({ title: "Lỗi", description: "Cập nhật thất bại" });
+      }
     } else {
-      const newFee = {
-        ...formData,
-        id: Math.max(...fees.map(f => f.id)) + 1,
-        ngaytao: new Date().toISOString().split('T')[0],
-      } as KhoanThu;
-      setFees([...fees, newFee]);
-      toast({
-        title: "Thành công",
-        description: "Đã thêm khoản thu mới thành công",
-      });
+      // Create
+      try {
+        const res = await apiClient.post("/khoanthu", formData);
+        setFees([...fees, res.data]);
+        toast({
+          title: "Thành công",
+          description: "Đã thêm khoản thu mới thành công",
+        });
+      } catch {
+        toast({ title: "Lỗi", description: "Thêm mới thất bại" });
+      }
     }
     setIsDialogOpen(false);
     setFormData({});
@@ -228,7 +220,7 @@ export const FeeManagement = ({ userRole }: FeeManagementProps) => {
                 <Input
                   id="tenkhoanthu"
                   value={formData.tenkhoanthu || ""}
-                  onChange={(e) => setFormData({...formData, tenkhoanthu: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, tenkhoanthu: e.target.value })}
                   placeholder="Nhập tên khoản thu"
                 />
               </div>
@@ -238,14 +230,14 @@ export const FeeManagement = ({ userRole }: FeeManagementProps) => {
                   id="thoihan"
                   type="date"
                   value={formData.thoihan || ""}
-                  onChange={(e) => setFormData({...formData, thoihan: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, thoihan: e.target.value })}
                 />
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
                   id="batbuoc"
                   checked={formData.batbuoc || false}
-                  onCheckedChange={(checked) => setFormData({...formData, batbuoc: checked})}
+                  onCheckedChange={(checked) => setFormData({ ...formData, batbuoc: checked })}
                 />
                 <Label htmlFor="batbuoc">Khoản thu bắt buộc</Label>
               </div>
@@ -254,7 +246,7 @@ export const FeeManagement = ({ userRole }: FeeManagementProps) => {
                 <Textarea
                   id="ghichu"
                   value={formData.ghichu || ""}
-                  onChange={(e) => setFormData({...formData, ghichu: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, ghichu: e.target.value })}
                   placeholder="Ghi chú về khoản thu"
                   rows={3}
                 />

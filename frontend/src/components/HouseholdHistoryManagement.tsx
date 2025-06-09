@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, Search, History } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import apiClient from "@/axiosConfig";
 
 interface LichSuHoKhau {
   id: number;
@@ -26,86 +26,43 @@ interface HouseholdHistoryManagementProps {
 }
 
 export const HouseholdHistoryManagement = ({ userRole }: HouseholdHistoryManagementProps) => {
-  const [histories, setHistories] = useState<LichSuHoKhau[]>([
-    {
-      id: 1,
-      hokhau_id: 1,
-      nhankhau_id: 1,
-      loaithaydoi: 1,
-      thoigian: "2024-01-15T10:30:00",
-      hokhau_name: "HK001",
-      nhankhau_name: "Nguyễn Văn A"
-    },
-    {
-      id: 2,
-      hokhau_id: 1,
-      nhankhau_id: 2,
-      loaithaydoi: 1,
-      thoigian: "2024-01-20T14:15:00",
-      hokhau_name: "HK001",
-      nhankhau_name: "Trần Thị B"
-    },
-    {
-      id: 3,
-      hokhau_id: 2,
-      nhankhau_id: 3,
-      loaithaydoi: 2,
-      thoigian: "2024-02-01T09:00:00",
-      hokhau_name: "HK002",
-      nhankhau_name: "Lê Văn C"
-    },
-    {
-    "id": 4,
-    "hokhau_id": 2,
-    "nhankhau_id": 4,
-    "loaithaydoi": 1,
-    "thoigian": "2024-02-10T08:45:00",
-    "hokhau_name": "HK002",
-    "nhankhau_name": "Phạm Thị D"
-  },
-  {
-    "id": 5,
-    "hokhau_id": 1,
-    "nhankhau_id": 5,
-    "loaithaydoi": 2,
-    "thoigian": "2024-02-15T11:20:00",
-    "hokhau_name": "HK001",
-    "nhankhau_name": "Hoàng Văn E"
-  },
-  {
-    "id": 6,
-    "hokhau_id": 3,
-    "nhankhau_id": 6,
-    "loaithaydoi": 1,
-    "thoigian": "2024-03-01T10:00:00",
-    "hokhau_name": "HK003",
-    "nhankhau_name": "Nguyễn Thị F"
-  },
-  {
-    "id": 7,
-    "hokhau_id": 3,
-    "nhankhau_id": 7,
-    "loaithaydoi": 2,
-    "thoigian": "2024-03-05T13:30:00",
-    "hokhau_name": "HK003",
-    "nhankhau_name": "Trần Văn G"
-  },
-  {
-    "id": 8,
-    "hokhau_id": 2,
-    "nhankhau_id": 8,
-    "loaithaydoi": 1,
-    "thoigian": "2024-03-10T15:10:00",
-    "hokhau_name": "HK002",
-    "nhankhau_name": "Lê Thị H"
-  }
-  ]);
+  const [histories, setHistories] = useState<LichSuHoKhau[]>([]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingHistory, setEditingHistory] = useState<LichSuHoKhau | null>(null);
   const [formData, setFormData] = useState<Partial<LichSuHoKhau>>({});
   const { toast } = useToast();
+
+  // Lấy danh sách lịch sử hộ khẩu từ API khi load component
+  useEffect(() => {
+    Promise.all([
+      apiClient.get("/lichsuhokhau/"),
+      apiClient.get("/hokhau/"),
+      apiClient.get("/nhankhau/")
+    ])
+      .then(([resHistory, resHoKhau, resNhanKhau]) => {
+        // Map hokhau_id -> sohokhau
+        const hoKhauMap = new Map<number, string>();
+        resHoKhau.data.forEach((hk: any) => {
+          hoKhauMap.set(hk.id, hk.sohokhau || `Hộ khẩu ${hk.id}`);
+        });
+
+        // Map nhankhau_id -> hoten
+        const nhanKhauMap = new Map<number, string>();
+        resNhanKhau.data.forEach((nk: any) => {
+          nhanKhauMap.set(nk.id, nk.hoten || `Nhân khẩu ${nk.id}`);
+        });
+
+        const historiesWithNames = resHistory.data.map((item: any) => ({
+          ...item,
+          hokhau_name: hoKhauMap.get(item.hokhau_id) || `ID ${item.hokhau_id}`,
+          nhankhau_name: nhanKhauMap.get(item.nhankhau_id) || `ID ${item.nhankhau_id}`,
+        }));
+        setHistories(historiesWithNames);
+      })
+      .catch(() => toast({ title: "Lỗi", description: "Không lấy được dữ liệu lịch sử hộ khẩu hoặc danh mục" }));
+  }, []);
 
   const filteredHistories = histories.filter(history =>
     history.hokhau_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -124,34 +81,44 @@ export const HouseholdHistoryManagement = ({ userRole }: HouseholdHistoryManagem
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    setHistories(histories.filter(h => h.id !== id));
-    toast({
-      title: "Thành công",
-      description: "Đã xóa lịch sử thành công",
-    });
+  const handleDelete = async (id: number) => {
+    try {
+      await apiClient.delete(`/lichsuhokhau/${id}`);
+      setHistories(histories.filter(h => h.id !== id));
+      toast({
+        title: "Thành công",
+        description: "Đã xóa lịch sử thành công",
+      });
+    } catch {
+      toast({ title: "Lỗi", description: "Xóa lịch sử thất bại" });
+    }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (editingHistory) {
-      setHistories(histories.map(h => 
-        h.id === editingHistory.id ? { ...h, ...formData } : h
-      ));
-      toast({
-        title: "Thành công",
-        description: "Đã cập nhật lịch sử thành công",
-      });
+      // Update
+      try {
+        const res = await apiClient.put(`/lichsuhokhau/${editingHistory.id}`, formData);
+        setHistories(histories.map(h => h.id === editingHistory.id ? res.data : h));
+        toast({
+          title: "Thành công",
+          description: "Đã cập nhật lịch sử thành công",
+        });
+      } catch {
+        toast({ title: "Lỗi", description: "Cập nhật thất bại" });
+      }
     } else {
-      const newHistory = {
-        ...formData,
-        id: Math.max(...histories.map(h => h.id)) + 1,
-        thoigian: new Date().toISOString(),
-      } as LichSuHoKhau;
-      setHistories([...histories, newHistory]);
-      toast({
-        title: "Thành công",
-        description: "Đã thêm lịch sử mới thành công",
-      });
+      // Create
+      try {
+        const res = await apiClient.post("/lichsuhokhau/", formData);
+        setHistories([...histories, res.data]);
+        toast({
+          title: "Thành công",
+          description: "Đã thêm lịch sử mới thành công",
+        });
+      } catch {
+        toast({ title: "Lỗi", description: "Thêm mới thất bại" });
+      }
     }
     setIsDialogOpen(false);
     setFormData({});

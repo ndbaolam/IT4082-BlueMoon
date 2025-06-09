@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, Search, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import apiClient from "@/axiosConfig";
 
 interface TamTruTamVang {
   id: number;
@@ -22,66 +22,65 @@ interface TamTruTamVang {
   nhankhau_name?: string;
 }
 
+interface NhanKhau {
+  id: number;
+  hoten: string;
+}
+
 interface TemporaryResidenceManagementProps {
   userRole: "to_truong" | "ke_toan";
 }
 
 export const TemporaryResidenceManagement = ({ userRole }: TemporaryResidenceManagementProps) => {
-  const [residences, setResidences] = useState<TamTruTamVang[]>([
-  {
-    "id": 4,
-    "nhankhau_id": 4,
-    "trangthai": "tạm trú",
-    "diachitamtrutamvang": "12 Phạm Hùng, Nam Từ Liêm, Hà Nội",
-    "thoigian": "2024-03-05",
-    "noidungdenghi": "Công tác 3 tháng",
-    "nhankhau_name": "Phạm Thị D"
-  },
-  {
-    "id": 5,
-    "nhankhau_id": 5,
-    "trangthai": "tạm vắng",
-    "diachitamtrutamvang": "88 Kim Mã, Ba Đình, Hà Nội",
-    "thoigian": "2024-03-12",
-    "noidungdenghi": "Chăm sóc người thân",
-    "nhankhau_name": "Hoàng Văn E"
-  },
-  {
-    "id": 6,
-    "nhankhau_id": 6,
-    "trangthai": "tạm trú",
-    "diachitamtrutamvang": "32 Trần Duy Hưng, Cầu Giấy, Hà Nội",
-    "thoigian": "2024-03-20",
-    "noidungdenghi": "Thực tập tại công ty",
-    "nhankhau_name": "Nguyễn Thị F"
-  },
-  {
-    "id": 7,
-    "nhankhau_id": 7,
-    "trangthai": "tạm vắng",
-    "diachitamtrutamvang": "25 Giảng Võ, Đống Đa, Hà Nội",
-    "thoigian": "2024-03-25",
-    "noidungdenghi": "Về quê giải quyết việc cá nhân",
-    "nhankhau_name": "Trần Văn G"
-  },
-  {
-    "id": 8,
-    "nhankhau_id": 8,
-    "trangthai": "tạm trú",
-    "diachitamtrutamvang": "59 Láng Hạ, Ba Đình, Hà Nội",
-    "thoigian": "2024-04-01",
-    "noidungdenghi": "Chuyển đến sống với người thân",
-    "nhankhau_name": "Lê Thị H"
-  }
-]
-);
-
+  const [residences, setResidences] = useState<TamTruTamVang[]>([]);
+  const [nhanKhauList, setNhanKhauList] = useState<NhanKhau[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingResidence, setEditingResidence] = useState<TamTruTamVang | null>(null);
   const [formData, setFormData] = useState<Partial<TamTruTamVang>>({});
   const { toast } = useToast();
+
+  // Fetch NhanKhau list for dropdown and name mapping
+  const fetchNhanKhauList = async () => {
+    try {
+      const res = await apiClient.get("/nhankhau/");
+      setNhanKhauList(res.data);
+    } catch {
+      toast({ title: "Lỗi", description: "Không lấy được danh sách nhân khẩu" });
+    }
+  };
+
+  // Lấy danh sách tạm trú/tạm vắng từ API khi load component
+  const fetchResidences = async () => {
+    try {
+      const res = await apiClient.get("/tamtrutamvang/");
+      const residencesData = res.data;
+      
+      // Map nhankhau names to residences
+      const residencesWithNames = residencesData.map((residence: TamTruTamVang) => {
+        const nhanKhau = nhanKhauList.find(nk => nk.id === residence.nhankhau_id);
+        return {
+          ...residence,
+          nhankhau_name: nhanKhau?.hoten || 'Không tìm thấy'
+        };
+      });
+      
+      setResidences(residencesWithNames);
+    } catch {
+      toast({ title: "Lỗi", description: "Không lấy được danh sách tạm trú/tạm vắng" });
+    }
+  };
+
+  useEffect(() => {
+    fetchNhanKhauList();
+  }, []);
+
+  useEffect(() => {
+    if (nhanKhauList.length > 0) {
+      fetchResidences();
+    }
+  }, [nhanKhauList]);
 
   const filteredResidences = residences.filter(residence => {
     const matchesSearch = residence.nhankhau_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -102,33 +101,56 @@ export const TemporaryResidenceManagement = ({ userRole }: TemporaryResidenceMan
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    setResidences(residences.filter(r => r.id !== id));
-    toast({
-      title: "Thành công",
-      description: "Đã xóa đăng ký tạm trú/tạm vắng thành công",
-    });
+  const handleDelete = async (id: number) => {
+    try {
+      await apiClient.delete(`/tamtrutamvang/${id}`);
+      setResidences(residences.filter(r => r.id !== id));
+      toast({
+        title: "Thành công",
+        description: "Đã xóa đăng ký tạm trú/tạm vắng thành công",
+      });
+    } catch {
+      toast({ title: "Lỗi", description: "Xóa đăng ký thất bại" });
+    }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (editingResidence) {
-      setResidences(residences.map(r => 
-        r.id === editingResidence.id ? { ...r, ...formData } : r
-      ));
-      toast({
-        title: "Thành công",
-        description: "Đã cập nhật đăng ký thành công",
-      });
+      // Update
+      try {
+        const res = await apiClient.put(`/tamtrutamvang/${editingResidence.id}`, formData);
+        // Add nhankhau_name to the updated record
+        const nhanKhau = nhanKhauList.find(nk => nk.id === res.data.nhankhau_id);
+        const updatedRecord = {
+          ...res.data,
+          nhankhau_name: nhanKhau?.hoten || 'Không tìm thấy'
+        };
+        setResidences(residences.map(r => r.id === editingResidence.id ? updatedRecord : r));
+        toast({
+          title: "Thành công",
+          description: "Đã cập nhật đăng ký thành công",
+        });
+      } catch {
+        toast({ title: "Lỗi", description: "Cập nhật đăng ký thất bại" });
+      }
     } else {
-      const newResidence = {
-        ...formData,
-        id: Math.max(...residences.map(r => r.id)) + 1,
-      } as TamTruTamVang;
-      setResidences([...residences, newResidence]);
-      toast({
-        title: "Thành công",
-        description: "Đã thêm đăng ký mới thành công",
-      });
+      // Create
+      try {
+        const res = await apiClient.post("/tamtrutamvang/", formData);
+        // Add nhankhau_name to the new record
+        const nhanKhau = nhanKhauList.find(nk => nk.id === res.data.nhankhau_id);
+        const newRecord = {
+          ...res.data,
+          nhankhau_name: nhanKhau?.hoten || 'Không tìm thấy'
+        };
+        setResidences([...residences, newRecord]);
+        toast({
+          title: "Thành công",
+          description: "Đã thêm đăng ký mới thành công",
+        });
+      } catch {
+        toast({ title: "Lỗi", description: "Thêm đăng ký thất bại" });
+      }
     }
     setIsDialogOpen(false);
     setFormData({});
@@ -289,18 +311,26 @@ export const TemporaryResidenceManagement = ({ userRole }: TemporaryResidenceMan
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="nhankhau_id">Nhân khẩu ID</Label>
-                  <Input
-                    id="nhankhau_id"
-                    type="number"
-                    value={formData.nhankhau_id || ""}
-                    onChange={(e) => setFormData({...formData, nhankhau_id: parseInt(e.target.value)})}
-                    placeholder="ID nhân khẩu"
-                  />
+                  <Label htmlFor="nhankhau_id">Nhân khẩu</Label>
+                  <Select 
+                    value={formData.nhankhau_id?.toString() || ""} 
+                    onValueChange={(value) => setFormData({ ...formData, nhankhau_id: parseInt(value) })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Chọn nhân khẩu" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {nhanKhauList.map((nhanKhau) => (
+                        <SelectItem key={nhanKhau.id} value={nhanKhau.id.toString()}>
+                          {nhanKhau.hoten}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="trangthai">Trạng thái</Label>
-                  <Select value={formData.trangthai || ""} onValueChange={(value) => setFormData({...formData, trangthai: value})}>
+                  <Select value={formData.trangthai || ""} onValueChange={(value) => setFormData({ ...formData, trangthai: value })}>
                     <SelectTrigger>
                       <SelectValue placeholder="Chọn trạng thái" />
                     </SelectTrigger>
@@ -316,7 +346,7 @@ export const TemporaryResidenceManagement = ({ userRole }: TemporaryResidenceMan
                 <Input
                   id="diachitamtrutamvang"
                   value={formData.diachitamtrutamvang || ""}
-                  onChange={(e) => setFormData({...formData, diachitamtrutamvang: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, diachitamtrutamvang: e.target.value })}
                   placeholder="Địa chỉ chi tiết"
                 />
               </div>
@@ -326,7 +356,7 @@ export const TemporaryResidenceManagement = ({ userRole }: TemporaryResidenceMan
                   id="thoigian"
                   type="date"
                   value={formData.thoigian || ""}
-                  onChange={(e) => setFormData({...formData, thoigian: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, thoigian: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
@@ -334,7 +364,7 @@ export const TemporaryResidenceManagement = ({ userRole }: TemporaryResidenceMan
                 <Textarea
                   id="noidungdenghi"
                   value={formData.noidungdenghi || ""}
-                  onChange={(e) => setFormData({...formData, noidungdenghi: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, noidungdenghi: e.target.value })}
                   placeholder="Lý do tạm trú/tạm vắng"
                   rows={3}
                 />
