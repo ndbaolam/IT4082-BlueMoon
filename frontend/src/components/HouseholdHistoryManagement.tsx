@@ -1,11 +1,37 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, Search, History } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -16,7 +42,7 @@ interface LichSuHoKhau {
   hokhau_id: number;
   nhankhau_id: number;
   loaithaydoi: number; // 1: thêm, 2: xóa
-  thoigian: string;
+  created_at: Date;
   hokhau_name?: string;
   nhankhau_name?: string;
 }
@@ -25,12 +51,17 @@ interface HouseholdHistoryManagementProps {
   userRole: "to_truong" | "ke_toan";
 }
 
-export const HouseholdHistoryManagement = ({ userRole }: HouseholdHistoryManagementProps) => {
+export const HouseholdHistoryManagement = ({
+  userRole,
+}: HouseholdHistoryManagementProps) => {
   const [histories, setHistories] = useState<LichSuHoKhau[]>([]);
-
+  const [hoKhauList, setHoKhauList] = useState<any[]>([]);
+  const [nhanKhauList, setNhanKhauList] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingHistory, setEditingHistory] = useState<LichSuHoKhau | null>(null);
+  const [editingHistory, setEditingHistory] = useState<LichSuHoKhau | null>(
+    null
+  );
   const [formData, setFormData] = useState<Partial<LichSuHoKhau>>({});
   const { toast } = useToast();
 
@@ -39,7 +70,7 @@ export const HouseholdHistoryManagement = ({ userRole }: HouseholdHistoryManagem
     Promise.all([
       apiClient.get("/lichsuhokhau/"),
       apiClient.get("/hokhau/"),
-      apiClient.get("/nhankhau/")
+      apiClient.get("/nhankhau/"),
     ])
       .then(([resHistory, resHoKhau, resNhanKhau]) => {
         // Map hokhau_id -> sohokhau
@@ -57,16 +88,25 @@ export const HouseholdHistoryManagement = ({ userRole }: HouseholdHistoryManagem
         const historiesWithNames = resHistory.data.map((item: any) => ({
           ...item,
           hokhau_name: hoKhauMap.get(item.hokhau_id) || `ID ${item.hokhau_id}`,
-          nhankhau_name: nhanKhauMap.get(item.nhankhau_id) || `ID ${item.nhankhau_id}`,
+          nhankhau_name:
+            nhanKhauMap.get(item.nhankhau_id) || `ID ${item.nhankhau_id}`,
         }));
         setHistories(historiesWithNames);
+        setHoKhauList(resHoKhau.data);
+        setNhanKhauList(resNhanKhau.data);
       })
-      .catch(() => toast({ title: "Lỗi", description: "Không lấy được dữ liệu lịch sử hộ khẩu hoặc danh mục" }));
+      .catch(() =>
+        toast({
+          title: "Lỗi",
+          description: "Không lấy được dữ liệu lịch sử hộ khẩu hoặc danh mục",
+        })
+      );
   }, []);
 
-  const filteredHistories = histories.filter(history =>
-    history.hokhau_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    history.nhankhau_name?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredHistories = histories.filter(
+    (history) =>
+      history.hokhau_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      history.nhankhau_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleCreate = () => {
@@ -84,7 +124,7 @@ export const HouseholdHistoryManagement = ({ userRole }: HouseholdHistoryManagem
   const handleDelete = async (id: number) => {
     try {
       await apiClient.delete(`/lichsuhokhau/${id}`);
-      setHistories(histories.filter(h => h.id !== id));
+      setHistories(histories.filter((h) => h.id !== id));
       toast({
         title: "Thành công",
         description: "Đã xóa lịch sử thành công",
@@ -98,8 +138,13 @@ export const HouseholdHistoryManagement = ({ userRole }: HouseholdHistoryManagem
     if (editingHistory) {
       // Update
       try {
-        const res = await apiClient.put(`/lichsuhokhau/${editingHistory.id}`, formData);
-        setHistories(histories.map(h => h.id === editingHistory.id ? res.data : h));
+        const res = await apiClient.put(
+          `/lichsuhokhau/${editingHistory.id}`,
+          formData
+        );
+        setHistories(
+          histories.map((h) => (h.id === editingHistory.id ? res.data : h))
+        );
         toast({
           title: "Thành công",
           description: "Đã cập nhật lịch sử thành công",
@@ -137,11 +182,18 @@ export const HouseholdHistoryManagement = ({ userRole }: HouseholdHistoryManagem
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Lịch sử hộ khẩu</h1>
-            <p className="text-gray-600">Theo dõi lịch sử thay đổi thành viên hộ khẩu</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+              Lịch sử hộ khẩu
+            </h1>
+            <p className="text-gray-600">
+              Theo dõi lịch sử thay đổi thành viên hộ khẩu
+            </p>
           </div>
           {userRole === "to_truong" && (
-            <Button onClick={handleCreate} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+            <Button
+              onClick={handleCreate}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            >
               <Plus className="w-4 h-4 mr-2" />
               Thêm lịch sử
             </Button>
@@ -156,7 +208,9 @@ export const HouseholdHistoryManagement = ({ userRole }: HouseholdHistoryManagem
                   <History className="w-6 h-6 mr-2 text-purple-600" />
                   Lịch sử thay đổi
                 </CardTitle>
-                <CardDescription>Tổng số: {histories.length} thay đổi</CardDescription>
+                <CardDescription>
+                  Tổng số: {histories.length} thay đổi
+                </CardDescription>
               </div>
               <div className="relative w-72">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -177,20 +231,28 @@ export const HouseholdHistoryManagement = ({ userRole }: HouseholdHistoryManagem
                   <TableHead>Nhân khẩu</TableHead>
                   <TableHead>Loại thay đổi</TableHead>
                   <TableHead>Thời gian</TableHead>
-                  {userRole === "to_truong" && <TableHead className="text-right">Thao tác</TableHead>}
+                  {userRole === "to_truong" && (
+                    <TableHead className="text-right">Thao tác</TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredHistories.map((history) => (
                   <TableRow key={history.id} className="hover:bg-gray-50/50">
-                    <TableCell className="font-medium">{history.hokhau_name}</TableCell>
+                    <TableCell className="font-medium">
+                      {history.hokhau_name}
+                    </TableCell>
                     <TableCell>{history.nhankhau_name}</TableCell>
                     <TableCell>
-                      <Badge variant={getChangeTypeBadge(history.loaithaydoi) as any}>
+                      <Badge
+                        variant={getChangeTypeBadge(history.loaithaydoi) as any}
+                      >
                         {getChangeTypeText(history.loaithaydoi)}
                       </Badge>
                     </TableCell>
-                    <TableCell>{new Date(history.thoigian).toLocaleString('vi-VN')}</TableCell>
+                    <TableCell>
+                      {new Date(history.created_at).toLocaleString("vi-VN")}
+                    </TableCell>
                     {userRole === "to_truong" && (
                       <TableCell className="text-right">
                         <div className="flex justify-end space-x-2">
@@ -233,30 +295,54 @@ export const HouseholdHistoryManagement = ({ userRole }: HouseholdHistoryManagem
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="hokhau_id">Hộ khẩu ID</Label>
-                  <Input
-                    id="hokhau_id"
-                    type="number"
-                    value={formData.hokhau_id || ""}
-                    onChange={(e) => setFormData({...formData, hokhau_id: parseInt(e.target.value)})}
-                    placeholder="ID hộ khẩu"
-                  />
+                  <Label htmlFor="hokhau_id">Hộ khẩu *</Label>
+                  <Select
+                    value={formData.hokhau_id ? String(formData.hokhau_id) : ""}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, hokhau_id: parseInt(value) })
+                    }
+                  >
+                    <SelectTrigger id="hokhau_id">
+                      <SelectValue placeholder="Chọn hộ khẩu" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {hoKhauList.map((hk) => (
+                        <SelectItem key={hk.id} value={String(hk.id)}>
+                          {hk.sohokhau || `Hộ khẩu ${hk.id}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="nhankhau_id">Nhân khẩu ID</Label>
-                  <Input
-                    id="nhankhau_id"
-                    type="number"
-                    value={formData.nhankhau_id || ""}
-                    onChange={(e) => setFormData({...formData, nhankhau_id: parseInt(e.target.value)})}
-                    placeholder="ID nhân khẩu"
-                  />
+                  <Label htmlFor="nhankhau_id">Nhân khẩu *</Label>
+                  <Select
+                    value={
+                      formData.nhankhau_id ? String(formData.nhankhau_id) : ""
+                    }
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, nhankhau_id: parseInt(value) })
+                    }
+                  >
+                    <SelectTrigger id="nhankhau_id">
+                      <SelectValue placeholder="Chọn nhân khẩu" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {nhanKhauList.map((nk) => (
+                        <SelectItem key={nk.id} value={String(nk.id)}>
+                          {nk.hoten || `Nhân khẩu ${nk.id}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="loaithaydoi">Loại thay đổi</Label>
-                  <Select 
-                    value={formData.loaithaydoi?.toString() || ""} 
-                    onValueChange={(value) => setFormData({...formData, loaithaydoi: parseInt(value)})}
+                  <Select
+                    value={formData.loaithaydoi?.toString() || ""}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, loaithaydoi: parseInt(value) })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Chọn loại thay đổi" />
@@ -269,10 +355,16 @@ export const HouseholdHistoryManagement = ({ userRole }: HouseholdHistoryManagem
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                >
                   Hủy
                 </Button>
-                <Button onClick={handleSubmit} className="bg-gradient-to-r from-purple-600 to-pink-600">
+                <Button
+                  onClick={handleSubmit}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600"
+                >
                   {editingHistory ? "Cập nhật" : "Thêm mới"}
                 </Button>
               </DialogFooter>

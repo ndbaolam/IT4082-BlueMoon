@@ -1,11 +1,30 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +39,7 @@ interface KhoanThu {
   tenkhoanthu: string;
   batbuoc: boolean;
   ghichu: string;
+  sotien: number; // Thêm trường số tiền
 }
 
 interface FeeManagementProps {
@@ -36,12 +56,18 @@ export const FeeManagement = ({ userRole }: FeeManagementProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    apiClient.get("/khoanthu")
-      .then(res => setFees(res.data))
-      .catch(() => toast({ title: "Lỗi", description: "Không lấy được danh sách khoản thu" }));
+    apiClient
+      .get("/khoanthu")
+      .then((res) => setFees(res.data))
+      .catch(() =>
+        toast({
+          title: "Lỗi",
+          description: "Không lấy được danh sách khoản thu",
+        })
+      );
   }, []);
 
-  const filteredFees = fees.filter(fee =>
+  const filteredFees = fees.filter((fee) =>
     fee.tenkhoanthu.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -60,7 +86,7 @@ export const FeeManagement = ({ userRole }: FeeManagementProps) => {
   const handleDelete = async (id: number) => {
     try {
       await apiClient.delete(`/khoanthu/${id}`);
-      setFees(fees.filter(f => f.id !== id));
+      setFees(fees.filter((f) => f.id !== id));
       toast({
         title: "Thành công",
         description: "Đã xóa khoản thu thành công",
@@ -75,7 +101,7 @@ export const FeeManagement = ({ userRole }: FeeManagementProps) => {
       // Update
       try {
         const res = await apiClient.put(`/khoanthu/${editingFee.id}`, formData);
-        setFees(fees.map(f => f.id === editingFee.id ? res.data : f));
+        setFees(fees.map((f) => (f.id === editingFee.id ? res.data : f)));
         toast({
           title: "Thành công",
           description: "Đã cập nhật khoản thu thành công",
@@ -101,32 +127,39 @@ export const FeeManagement = ({ userRole }: FeeManagementProps) => {
   };
 
   // Only ke_toan can access this page
-  if (userRole !== "ke_toan") {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 p-8 flex items-center justify-center">
-        <Card className="w-96">
-          <CardHeader>
-            <CardTitle className="text-center text-red-600">Không có quyền truy cập</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-center text-gray-600">
-              Chỉ kế toán mới có quyền quản lý khoản thu.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // if (userRole !== "ke_toan") {
+  //   return (
+  //     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 p-8 flex items-center justify-center">
+  //       <Card className="w-96">
+  //         <CardHeader>
+  //           <CardTitle className="text-center text-red-600">Không có quyền truy cập</CardTitle>
+  //         </CardHeader>
+  //         <CardContent>
+  //           <p className="text-center text-gray-600">
+  //             Chỉ kế toán mới có quyền quản lý khoản thu.
+  //           </p>
+  //         </CardContent>
+  //       </Card>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Quản lý khoản thu</h1>
-            <p className="text-gray-600">Quản lý các khoản thu phí trong tổ dân phố</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+              Quản lý khoản thu
+            </h1>
+            <p className="text-gray-600">
+              Quản lý các khoản thu phí trong tổ dân phố
+            </p>
           </div>
-          <Button onClick={handleCreate} className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700">
+          <Button
+            onClick={handleCreate}
+            className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
+          >
             <Plus className="w-4 h-4 mr-2" />
             Thêm khoản thu
           </Button>
@@ -140,7 +173,9 @@ export const FeeManagement = ({ userRole }: FeeManagementProps) => {
                   <DollarSign className="w-6 h-6 mr-2 text-orange-600" />
                   Danh sách khoản thu
                 </CardTitle>
-                <CardDescription>Tổng số: {fees.length} khoản thu</CardDescription>
+                <CardDescription>
+                  Tổng số: {fees.length} khoản thu
+                </CardDescription>
               </div>
               <div className="relative w-72">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -161,6 +196,7 @@ export const FeeManagement = ({ userRole }: FeeManagementProps) => {
                   <TableHead>Ngày tạo</TableHead>
                   <TableHead>Thời hạn</TableHead>
                   <TableHead>Loại</TableHead>
+                  <TableHead>Số tiền</TableHead>
                   <TableHead>Ghi chú</TableHead>
                   <TableHead className="text-right">Thao tác</TableHead>
                 </TableRow>
@@ -168,15 +204,26 @@ export const FeeManagement = ({ userRole }: FeeManagementProps) => {
               <TableBody>
                 {filteredFees.map((fee) => (
                   <TableRow key={fee.id} className="hover:bg-gray-50/50">
-                    <TableCell className="font-medium">{fee.tenkhoanthu}</TableCell>
-                    <TableCell>{new Date(fee.ngaytao).toLocaleDateString('vi-VN')}</TableCell>
-                    <TableCell>{new Date(fee.thoihan).toLocaleDateString('vi-VN')}</TableCell>
+                    <TableCell className="font-medium">
+                      {fee.tenkhoanthu}
+                    </TableCell>
                     <TableCell>
-                      <Badge variant={fee.batbuoc ? "destructive" : "secondary"}>
+                      {new Date(fee.ngaytao).toLocaleDateString("vi-VN")}
+                    </TableCell>
+                    <TableCell>
+                      {new Date(fee.thoihan).toLocaleDateString("vi-VN")}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={fee.batbuoc ? "destructive" : "secondary"}
+                      >
                         {fee.batbuoc ? "Bắt buộc" : "Tự nguyện"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="max-w-xs truncate">{fee.ghichu}</TableCell>
+                    <TableCell>{fee.sotien?.toLocaleString("vi-VN")}</TableCell>
+                    <TableCell className="max-w-xs truncate">
+                      {fee.ghichu}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-2">
                         <Button
@@ -220,7 +267,9 @@ export const FeeManagement = ({ userRole }: FeeManagementProps) => {
                 <Input
                   id="tenkhoanthu"
                   value={formData.tenkhoanthu || ""}
-                  onChange={(e) => setFormData({ ...formData, tenkhoanthu: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, tenkhoanthu: e.target.value })
+                  }
                   placeholder="Nhập tên khoản thu"
                 />
               </div>
@@ -230,23 +279,44 @@ export const FeeManagement = ({ userRole }: FeeManagementProps) => {
                   id="thoihan"
                   type="date"
                   value={formData.thoihan || ""}
-                  onChange={(e) => setFormData({ ...formData, thoihan: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, thoihan: e.target.value })
+                  }
                 />
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
                   id="batbuoc"
                   checked={formData.batbuoc || false}
-                  onCheckedChange={(checked) => setFormData({ ...formData, batbuoc: checked })}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, batbuoc: checked })
+                  }
                 />
                 <Label htmlFor="batbuoc">Khoản thu bắt buộc</Label>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sotien">Số tiền *</Label>
+                <Input
+                  id="sotien"
+                  type="number"
+                  value={formData.sotien || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      sotien: parseInt(e.target.value),
+                    })
+                  }
+                  placeholder="Nhập số tiền khoản thu"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="ghichu">Ghi chú</Label>
                 <Textarea
                   id="ghichu"
                   value={formData.ghichu || ""}
-                  onChange={(e) => setFormData({ ...formData, ghichu: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, ghichu: e.target.value })
+                  }
                   placeholder="Ghi chú về khoản thu"
                   rows={3}
                 />
@@ -256,7 +326,10 @@ export const FeeManagement = ({ userRole }: FeeManagementProps) => {
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                 Hủy
               </Button>
-              <Button onClick={handleSubmit} className="bg-gradient-to-r from-orange-600 to-red-600">
+              <Button
+                onClick={handleSubmit}
+                className="bg-gradient-to-r from-orange-600 to-red-600"
+              >
                 {editingFee ? "Cập nhật" : "Thêm mới"}
               </Button>
             </DialogFooter>

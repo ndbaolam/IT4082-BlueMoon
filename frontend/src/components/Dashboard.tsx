@@ -146,8 +146,8 @@ export const Dashboard = ({ userRole }: DashboardProps) => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivities.map((activity) => (
-                <div key={activity.id} className="flex items-center space-x-4 p-3 rounded-lg bg-gray-50/50">
+              {recentActivities.map((activity, idx) => (
+                <div key={idx} className="flex items-center space-x-4 p-3 rounded-lg bg-gray-50/50">
                   <div className={`w-2 h-2 rounded-full ${activity.type === 'household' ? 'bg-blue-500' :
                     activity.type === 'payment' ? 'bg-green-500' : 'bg-purple-500'
                     }`} />

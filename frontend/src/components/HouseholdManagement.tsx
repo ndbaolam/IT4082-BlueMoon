@@ -1,13 +1,35 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Plus, Edit, Trash2, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import apiClient from "@/axiosConfig";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 interface HoKhau {
   id: number;
@@ -27,7 +49,7 @@ interface HouseholdManagementProps {
 
 export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
   const [households, setHouseholds] = useState<HoKhau[]>([]);
-
+  const [nhanKhauList, setNhanKhauList] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingHousehold, setEditingHousehold] = useState<HoKhau | null>(null);
@@ -35,10 +57,7 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    Promise.all([
-      apiClient.get("/hokhau"),
-      apiClient.get("/nhankhau")
-    ])
+    Promise.all([apiClient.get("/hokhau"), apiClient.get("/nhankhau")])
       .then(([resHoKhau, resNhanKhau]) => {
         // Map chu_ho_id -> hoten
         const nhanKhauMap = new Map<number, string>();
@@ -52,14 +71,21 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
         }));
 
         setHouseholds(householdsWithChuHoName);
+        setNhanKhauList(resNhanKhau.data);
       })
-      .catch(() => toast({ title: "Lỗi", description: "Không lấy được danh sách hộ khẩu hoặc nhân khẩu" }));
+      .catch(() =>
+        toast({
+          title: "Lỗi",
+          description: "Không lấy được danh sách hộ khẩu hoặc nhân khẩu",
+        })
+      );
   }, []);
 
-  const filteredHouseholds = households.filter(household =>
-    household.sohokhau.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    household.chu_ho_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    household.duong.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredHouseholds = households.filter(
+    (household) =>
+      household.sohokhau.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      household.chu_ho_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      household.duong.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleCreate = () => {
@@ -77,7 +103,7 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
   const handleDelete = async (id: number) => {
     try {
       await apiClient.delete(`/hokhau/${id}`);
-      setHouseholds(households.filter(h => h.id !== id));
+      setHouseholds(households.filter((h) => h.id !== id));
       toast({
         title: "Thành công",
         description: "Đã xóa hộ khẩu thành công",
@@ -91,8 +117,13 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
     if (editingHousehold) {
       // Update
       try {
-        const res = await apiClient.put(`/hokhau/${editingHousehold.id}`, formData);
-        setHouseholds(households.map(h => h.id === editingHousehold.id ? res.data : h));
+        const res = await apiClient.put(
+          `/hokhau/${editingHousehold.id}`,
+          formData
+        );
+        setHouseholds(
+          households.map((h) => (h.id === editingHousehold.id ? res.data : h))
+        );
         toast({
           title: "Thành công",
           description: "Đã cập nhật hộ khẩu thành công",
@@ -122,10 +153,17 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Quản lý hộ khẩu</h1>
-            <p className="text-gray-600">Quản lý thông tin hộ khẩu trong tổ dân phố</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+              Quản lý hộ khẩu
+            </h1>
+            <p className="text-gray-600">
+              Quản lý thông tin hộ khẩu trong tổ dân phố
+            </p>
           </div>
-          <Button onClick={handleCreate} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+          <Button
+            onClick={handleCreate}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          >
             <Plus className="w-4 h-4 mr-2" />
             Thêm hộ khẩu
           </Button>
@@ -135,8 +173,12 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-2xl text-gray-900">Danh sách hộ khẩu</CardTitle>
-                <CardDescription>Tổng số: {households.length} hộ khẩu</CardDescription>
+                <CardTitle className="text-2xl text-gray-900">
+                  Danh sách hộ khẩu
+                </CardTitle>
+                <CardDescription>
+                  Tổng số: {households.length} hộ khẩu
+                </CardDescription>
               </div>
               <div className="relative w-72">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -163,12 +205,19 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
               <TableBody>
                 {filteredHouseholds.map((household) => (
                   <TableRow key={household.id} className="hover:bg-gray-50/50">
-                    <TableCell className="font-medium">{household.sohokhau}</TableCell>
+                    <TableCell className="font-medium">
+                      {household.sohokhau}
+                    </TableCell>
                     <TableCell>
-                      {household.sonha} {household.duong}, {household.phuong}, {household.quan}
+                      {household.sonha} {household.duong}, {household.phuong},{" "}
+                      {household.quan}
                     </TableCell>
                     <TableCell>{household.chu_ho_name}</TableCell>
-                    <TableCell>{new Date(household.ngaylamhokhau).toLocaleDateString('vi-VN')}</TableCell>
+                    <TableCell>
+                      {new Date(household.ngaylamhokhau).toLocaleDateString(
+                        "vi-VN"
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-2">
                         <Button
@@ -212,7 +261,9 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
                 <Input
                   id="sohokhau"
                   value={formData.sohokhau || ""}
-                  onChange={(e) => setFormData({ ...formData, sohokhau: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, sohokhau: e.target.value })
+                  }
                   placeholder="Nhập số hộ khẩu"
                 />
               </div>
@@ -221,7 +272,9 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
                 <Input
                   id="sonha"
                   value={formData.sonha || ""}
-                  onChange={(e) => setFormData({ ...formData, sonha: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, sonha: e.target.value })
+                  }
                   placeholder="Số nhà"
                 />
               </div>
@@ -230,7 +283,9 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
                 <Input
                   id="duong"
                   value={formData.duong || ""}
-                  onChange={(e) => setFormData({ ...formData, duong: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, duong: e.target.value })
+                  }
                   placeholder="Tên đường"
                 />
               </div>
@@ -239,7 +294,9 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
                 <Input
                   id="phuong"
                   value={formData.phuong || ""}
-                  onChange={(e) => setFormData({ ...formData, phuong: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phuong: e.target.value })
+                  }
                   placeholder="Tên phường"
                 />
               </div>
@@ -248,7 +305,9 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
                 <Input
                   id="quan"
                   value={formData.quan || ""}
-                  onChange={(e) => setFormData({ ...formData, quan: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, quan: e.target.value })
+                  }
                   placeholder="Tên quận"
                 />
               </div>
@@ -258,15 +317,40 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
                   id="ngaylamhokhau"
                   type="date"
                   value={formData.ngaylamhokhau || ""}
-                  onChange={(e) => setFormData({ ...formData, ngaylamhokhau: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, ngaylamhokhau: e.target.value })
+                  }
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="chu_ho_id">Chủ hộ</Label>
+                <Select
+                  value={formData.chu_ho_id ? String(formData.chu_ho_id) : ""}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, chu_ho_id: parseInt(value) })
+                  }
+                >
+                  <SelectTrigger id="chu_ho_id">
+                    <SelectValue placeholder="Chọn chủ hộ" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {nhanKhauList.map((nk) => (
+                      <SelectItem key={nk.id} value={String(nk.id)}>
+                        {nk.hoten || `Nhân khẩu ${nk.id}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                 Hủy
               </Button>
-              <Button onClick={handleSubmit} className="bg-gradient-to-r from-blue-600 to-purple-600">
+              <Button
+                onClick={handleSubmit}
+                className="bg-gradient-to-r from-blue-600 to-purple-600"
+              >
                 {editingHousehold ? "Cập nhật" : "Thêm mới"}
               </Button>
             </DialogFooter>

@@ -7,6 +7,7 @@ class KhoanThuBase(BaseModel):
     thoihan: Optional[date] = None
     batbuoc: bool = True
     ghichu: Optional[str] = None
+    sotien: int
 
 class KhoanThuCreate(KhoanThuBase):
     pass

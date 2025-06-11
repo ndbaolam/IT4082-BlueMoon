@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -24,12 +30,17 @@ export const Profile = ({ userRole }: ProfileProps) => {
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
-  });
+  });  
 
   useEffect(() => {
     // Lấy thông tin cá nhân từ backend
+    const token = localStorage.getItem("access_token");
     apiClient
-      .get("/users/me")
+      .get("/users/me", {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : undefined,
+        },
+      })
       .then((response) => {
         const data = response.data;
         setProfileData({
@@ -47,32 +58,49 @@ export const Profile = ({ userRole }: ProfileProps) => {
       });
   }, []);
 
-
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await apiClient.put(`/users/${profileData.email}`, {
-        first_name: profileData.fullName.split(" ")[0],
-        last_name: profileData.fullName.split(" ").slice(1).join(" "),
-        sodienthoai: profileData.phone,
-        diachi: profileData.address,
-      });
+      const token = localStorage.getItem("access_token");
+      await apiClient.put(
+        `/users/${profileData.email}`,
+        {
+          first_name: profileData.fullName.split(" ")[0],
+          last_name: profileData.fullName.split(" ").slice(1).join(" "),
+          sodienthoai: profileData.phone,
+          diachi: profileData.address,
+        },
+        {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : undefined,
+          },
+        }
+      );
       alert("Cập nhật thông tin thành công!");
     } catch (error) {
       alert("Cập nhật thông tin thất bại!");
     }
   };
 
-    const handlePasswordChange = async (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       alert("Mật khẩu xác nhận không khớp!");
       return;
     }
     try {
-      await apiClient.put(`/users/${profileData.email}`, {
-        password: passwordData.newPassword,
-      });
+      const token = localStorage.getItem("access_token");
+      await apiClient.put(
+        `/users/${profileData.email}`,
+        {
+          password: passwordData.newPassword,
+        },
+        {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : undefined,
+          },
+        }
+      );
       alert("Đổi mật khẩu thành công!");
       setPasswordData({
         currentPassword: "",
@@ -84,12 +112,13 @@ export const Profile = ({ userRole }: ProfileProps) => {
     }
   };
 
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-10">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Thông tin cá nhân</h1>
-        <p className="text-gray-600 mt-2">Quản lý thông tin tài khoản và cài đặt bảo mật</p>
+        <p className="text-gray-600 mt-2">
+          Quản lý thông tin tài khoản và cài đặt bảo mật
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -98,7 +127,10 @@ export const Profile = ({ userRole }: ProfileProps) => {
             <Avatar className="w-24 h-24 mx-auto mb-4">
               <AvatarImage src="" />
               <AvatarFallback className="text-2xl bg-blue-100 text-blue-600">
-                {profileData.fullName.split(" ").map((n) => n[0]).join("")}
+                {profileData.fullName
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")}
               </AvatarFallback>
             </Avatar>
             <CardTitle>{profileData.fullName}</CardTitle>
@@ -153,7 +185,10 @@ export const Profile = ({ userRole }: ProfileProps) => {
                         id="fullName"
                         value={profileData.fullName}
                         onChange={(e) =>
-                          setProfileData({ ...profileData, fullName: e.target.value })
+                          setProfileData({
+                            ...profileData,
+                            fullName: e.target.value,
+                          })
                         }
                       />
                     </div>
@@ -164,7 +199,10 @@ export const Profile = ({ userRole }: ProfileProps) => {
                         type="email"
                         value={profileData.email}
                         onChange={(e) =>
-                          setProfileData({ ...profileData, email: e.target.value })
+                          setProfileData({
+                            ...profileData,
+                            email: e.target.value,
+                          })
                         }
                       />
                     </div>
@@ -176,7 +214,10 @@ export const Profile = ({ userRole }: ProfileProps) => {
                         id="phone"
                         value={profileData.phone}
                         onChange={(e) =>
-                          setProfileData({ ...profileData, phone: e.target.value })
+                          setProfileData({
+                            ...profileData,
+                            phone: e.target.value,
+                          })
                         }
                       />
                     </div>
@@ -196,7 +237,10 @@ export const Profile = ({ userRole }: ProfileProps) => {
                       id="address"
                       value={profileData.address}
                       onChange={(e) =>
-                        setProfileData({ ...profileData, address: e.target.value })
+                        setProfileData({
+                          ...profileData,
+                          address: e.target.value,
+                        })
                       }
                     />
                   </div>
@@ -213,7 +257,10 @@ export const Profile = ({ userRole }: ProfileProps) => {
                       type="password"
                       value={passwordData.currentPassword}
                       onChange={(e) =>
-                        setPasswordData({ ...passwordData, currentPassword: e.target.value })
+                        setPasswordData({
+                          ...passwordData,
+                          currentPassword: e.target.value,
+                        })
                       }
                       placeholder="Nhập mật khẩu hiện tại"
                     />
@@ -225,19 +272,27 @@ export const Profile = ({ userRole }: ProfileProps) => {
                       type="password"
                       value={passwordData.newPassword}
                       onChange={(e) =>
-                        setPasswordData({ ...passwordData, newPassword: e.target.value })
+                        setPasswordData({
+                          ...passwordData,
+                          newPassword: e.target.value,
+                        })
                       }
                       placeholder="Nhập mật khẩu mới"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Xác nhận mật khẩu mới</Label>
+                    <Label htmlFor="confirmPassword">
+                      Xác nhận mật khẩu mới
+                    </Label>
                     <Input
                       id="confirmPassword"
                       type="password"
                       value={passwordData.confirmPassword}
                       onChange={(e) =>
-                        setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                        setPasswordData({
+                          ...passwordData,
+                          confirmPassword: e.target.value,
+                        })
                       }
                       placeholder="Nhập lại mật khẩu mới"
                     />
@@ -253,7 +308,9 @@ export const Profile = ({ userRole }: ProfileProps) => {
                     <div className="flex items-center justify-between p-3 border rounded-lg">
                       <div>
                         <div className="font-medium">Thông báo email</div>
-                        <div className="text-sm text-gray-500">Nhận thông báo qua email</div>
+                        <div className="text-sm text-gray-500">
+                          Nhận thông báo qua email
+                        </div>
                       </div>
                       <Button variant="outline" size="sm">
                         Bật
@@ -262,7 +319,9 @@ export const Profile = ({ userRole }: ProfileProps) => {
                     <div className="flex items-center justify-between p-3 border rounded-lg">
                       <div>
                         <div className="font-medium">Đồng bộ dữ liệu</div>
-                        <div className="text-sm text-gray-500">Tự động đồng bộ dữ liệu</div>
+                        <div className="text-sm text-gray-500">
+                          Tự động đồng bộ dữ liệu
+                        </div>
                       </div>
                       <Button variant="outline" size="sm">
                         Bật
@@ -271,7 +330,9 @@ export const Profile = ({ userRole }: ProfileProps) => {
                     <div className="flex items-center justify-between p-3 border rounded-lg">
                       <div>
                         <div className="font-medium">Sao lưu tự động</div>
-                        <div className="text-sm text-gray-500">Sao lưu dữ liệu hàng ngày</div>
+                        <div className="text-sm text-gray-500">
+                          Sao lưu dữ liệu hàng ngày
+                        </div>
                       </div>
                       <Button variant="outline" size="sm">
                         Bật

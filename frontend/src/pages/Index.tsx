@@ -14,18 +14,12 @@ import UserPage from "./UserPage";
 import ReportsPage from "./ReportsPage";
 import ProfilePage from "./ProfilePage";
 import apiClient from '../axiosConfig.ts'
+import { useAuth } from '@/context/AuthContext';
 
 const Index = () => {  
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState<"to_truong" | "ke_toan">("to_truong");
+  const {userRole, setUserRole, isLoggedIn, setIsLoggedIn } = useAuth()
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const handleLogin = (role: "to_truong" | "ke_toan") => {
-    setIsLoggedIn(true);
-    setUserRole(role);
-    navigate("/dashboard");
-  };
+  const location = useLocation();  
 
   const handleLogout = async () => {
     try {
@@ -49,6 +43,7 @@ const Index = () => {
       alert("Có lỗi xảy ra khi đăng xuất!");
     }
   };
+
   useEffect(() => {
     const token = localStorage.getItem("access_token");
   

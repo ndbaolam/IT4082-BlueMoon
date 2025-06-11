@@ -56,7 +56,7 @@ export const Sidebar = ({ userRole, onLogout }: SidebarProps) => {
       label: "Quản lý khoản thu",
       icon: DollarSign,
       path: "/fees",
-      roles: ["ke_toan"]
+      roles: ["ke_toan", "to_truong"]
     },
     {
       id: "payments",

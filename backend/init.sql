@@ -1,4 +1,4 @@
-CREATE TYPE user_role AS ENUM ('ke_toan', 'to_truong');
+CREATE TYPE user_role AS ENUM ('ketoan', 'totruong');
 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
@@ -87,6 +87,7 @@ CREATE TABLE khoanthu (
     thoihan DATE,
     tenkhoanthu VARCHAR(100) NOT NULL,
     batbuoc BOOLEAN NOT NULL DEFAULT TRUE,
+    sotien INT NOT NULL,
     ghichu TEXT,
     trangthai BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,

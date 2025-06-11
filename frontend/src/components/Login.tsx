@@ -13,6 +13,7 @@ import { Building2 } from "lucide-react";
 import qs from "qs";
 import apiClient from "@/axiosConfig";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from '@/context/AuthContext'
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -25,7 +26,9 @@ export const Login = () => {
     sodienthoai: "",
     diachi: "",
   });
-  const [isLogin, setIsLogin] = useState(true); // State to toggle between login and register
+  
+  const {userRole, setUserRole, isLoggedIn, setIsLoggedIn } = useAuth()
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -45,7 +48,7 @@ export const Login = () => {
 
       if (response.status === 201 || response.status === 200) {
         alert("Đăng ký thành công!");
-        setIsLogin(true);
+        setIsLoggedIn(true);
       } else {
         alert("Đăng ký thất bại!");
       }
@@ -79,6 +82,8 @@ export const Login = () => {
         const data = response.data;
         console.log("Login successful:", data);
         localStorage.setItem("access_token", data.access_token);
+        setIsLoggedIn(true)
+        setUserRole(data.vaitro)
         navigate("/dashboard");
       } else {
         alert("Đăng nhập thất bại!");
@@ -103,16 +108,15 @@ export const Login = () => {
               </div>
             </div>
             <CardTitle className="text-2xl font-bold text-gray-900">
-              {isLogin ? "Đăng nhập hệ thống" : "Đăng ký tài khoản"}
+              {isLoggedIn ? "Đăng nhập hệ thống" : "Đăng ký tài khoản"}
             </CardTitle>
             <CardDescription className="text-gray-600">
-              {isLogin
+              {isLoggedIn
                 ? "Quản lý tổ dân phố"
                 : "Tạo tài khoản mới để truy cập hệ thống"}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {isLogin ? (
               <form onSubmit={handleLoginSubmit} className="space-y-6">
                 <div className="space-y-2">
                   <Label
@@ -156,163 +160,7 @@ export const Login = () => {
                 >
                   Đăng nhập
                 </Button>
-              </form>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="email"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    placeholder="Nhập email"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="password"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Mật khẩu
-                  </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
-                    placeholder="Nhập mật khẩu"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="vaitro"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Vai trò
-                  </Label>
-                  <select
-                    id="vaitro"
-                    value={formData.vaitro}
-                    onChange={(e) =>
-                      setFormData({ ...formData, vaitro: e.target.value })
-                    }
-                    className="w-full h-12 border rounded-lg px-3"
-                    required
-                  >
-                    <option value="to_truong">Tổ trưởng</option>
-                    <option value="ke_toan">Kế toán</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="first_name"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Họ
-                  </Label>
-                  <Input
-                    id="first_name"
-                    type="text"
-                    value={formData.first_name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, first_name: e.target.value })
-                    }
-                    placeholder="Nhập họ"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="last_name"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Tên
-                  </Label>
-                  <Input
-                    id="last_name"
-                    type="text"
-                    value={formData.last_name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, last_name: e.target.value })
-                    }
-                    placeholder="Nhập tên"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="sodienthoai"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Số điện thoại
-                  </Label>
-                  <Input
-                    id="sodienthoai"
-                    type="text"
-                    value={formData.sodienthoai}
-                    onChange={(e) =>
-                      setFormData({ ...formData, sodienthoai: e.target.value })
-                    }
-                    placeholder="Nhập số điện thoại"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="diachi"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Địa chỉ
-                  </Label>
-                  <Input
-                    id="diachi"
-                    type="text"
-                    value={formData.diachi}
-                    onChange={(e) =>
-                      setFormData({ ...formData, diachi: e.target.value })
-                    }
-                    placeholder="Nhập địa chỉ"
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200"
-                >
-                  Đăng ký
-                </Button>
-              </form>
-            )}
-
-            <div className="mt-8 flex justify-between items-center">
-              <p className="text-sm text-gray-600">
-                {isLogin ? "Chưa có tài khoản?" : "Đã có tài khoản?"}
-              </p>
-              <Button
-                variant="outline"
-                className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white"
-                onClick={() => setIsLogin(!isLogin)} // Toggle between login and register
-              >
-                {isLogin ? "Đăng ký" : "Đăng nhập"}
-              </Button>
-            </div>
+              </form>                        
           </CardContent>
         </Card>
       </div>

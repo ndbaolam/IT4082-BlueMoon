@@ -6,19 +6,20 @@ class LichSuHoKhauBase(BaseModel):
     hokhau_id: int
     nhankhau_id: int
     loaithaydoi: int
-    thoigian: str
+    created_at: datetime 
 
-class LichSuHoKhauCreate(LichSuHoKhauBase):
-    pass
+class LichSuHoKhauCreate(BaseModel):
+    hokhau_id: int
+    nhankhau_id: int
+    loaithaydoi: int
 
 class LichSuHoKhauUpdate(BaseModel):
     hokhau_id: Optional[int]
     nhankhau_id: Optional[int]
     loaithaydoi: Optional[int]
-    thoigian: Optional[str]
 
 class LichSuHoKhau(LichSuHoKhauBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True

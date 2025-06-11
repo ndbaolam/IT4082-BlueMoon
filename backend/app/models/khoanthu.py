@@ -12,6 +12,7 @@ class KhoanThu(Base):
     tenkhoanthu = Column(String(100), nullable=False)
     batbuoc = Column(Boolean, nullable=False, server_default='true')
     ghichu = Column(Text, nullable=True)
+    sotien = Column(Integer, nullable=False, default=0)
     
     created_at = Column(
         TIMESTAMP(timezone=True),

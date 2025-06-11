@@ -38,7 +38,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
         raise HTTPException(status_code=401, detail="Sai tài khoản hoặc mật khẩu")
     
     token = create_access_token(data={"sub": user.email})
-    return {"access_token": token, "token_type": "bearer"}
+    return {"access_token": token, "token_type": "bearer", "vaitro": user.vaitro}
   
 @router.put("/{email}", response_model=user_schema.User)
 def update_user(email: str, update_data: user_schema.UserCreate, db: Session = Depends(get_db)):
