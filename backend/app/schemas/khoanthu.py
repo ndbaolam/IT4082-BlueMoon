@@ -2,26 +2,31 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import date, datetime
 
-class KhoanThuBase(BaseModel):
-    id: int
-    ngaytao: date
+# Dữ liệu người dùng gửi vào
+class KhoanThuCreate(BaseModel):
     tenkhoanthu: str
     thoihan: Optional[date] = None
     batbuoc: bool = True
     ghichu: Optional[str] = None
     sotien: int
 
-class KhoanThuCreate(KhoanThuBase):
-    pass
+# Dữ liệu người dùng có thể cập nhật
+class KhoanThuUpdate(BaseModel):
+    tenkhoanthu: Optional[str] = None
+    thoihan: Optional[date] = None
+    batbuoc: Optional[bool] = None
+    ghichu: Optional[str] = None
+    sotien: Optional[int] = None
 
-class KhoanThuUpdate(KhoanThuBase):
-    pass
-
-class KhoanThuInDB(KhoanThuBase):    
+# Schema để trả ra client (bao gồm cả id, ngaytao...)
+class KhoanThuResponse(BaseModel):
     id: int
     ngaytao: date
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    tenkhoanthu: str
+    thoihan: Optional[date] = None
+    batbuoc: bool
+    ghichu: Optional[str] = None
+    sotien: int
 
     class Config:
-        from_attributes = True
+        from_attributes = True  # Cho phép đọc từ ORM
