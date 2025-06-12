@@ -131,6 +131,7 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
       // Create
       try {
         const res = await apiClient.post("/hokhau", formData);
+        console.log("New household created:", formData);
         setHouseholds([...households, res.data]);
         toast({
           title: "Thành công",

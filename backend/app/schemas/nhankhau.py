@@ -3,7 +3,6 @@ from typing import Optional
 from datetime import date
 
 class NhanKhauBase(BaseModel):
-    id: int
     hoten: str
     ngaysinh: Optional[date]
     gioitinh: Optional[str]
@@ -18,6 +17,8 @@ class NhanKhauBase(BaseModel):
 class NhanKhauCreate(NhanKhauBase):
     pass
 
-class NhanKhau(NhanKhauBase):    
+class NhanKhau(NhanKhauBase):  
+    id: int
+      
     class Config:
         from_attributes = True
