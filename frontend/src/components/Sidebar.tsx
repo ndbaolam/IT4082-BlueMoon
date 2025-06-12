@@ -124,7 +124,7 @@ export const Sidebar = ({ userRole, onLogout }: SidebarProps) => {
             </div>
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">Tổ dân phố</h1>
+            <h1 className="text-xl font-bold text-white">C.c BlueMoon</h1>
             <p className="text-sm text-slate-300 capitalize font-medium">
               {userRole === "to_truong" ? "Tổ trưởng" : "Kế toán"}
             </p>
