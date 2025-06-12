@@ -3,9 +3,7 @@ from typing import Optional
 from datetime import date, datetime
 
 class TamTruTamVangBase(BaseModel):
-    id: int
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    # id: int
     nhankhau_id: int
     trangthai: str
     diachitamtrutamvang: Optional[str] = None
@@ -20,6 +18,8 @@ class TamTruTamVangUpdate(TamTruTamVangBase):
 
 class TamTruTamVangInDB(TamTruTamVangBase):
     id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

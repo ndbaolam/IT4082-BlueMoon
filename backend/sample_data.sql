@@ -128,8 +128,8 @@ VALUES
 
 INSERT INTO users (password, vaitro, first_name, last_name, email, sodienthoai, diachi)
 VALUES
-('hashed_pass1', 'ketoan', 'Mai', 'An', 'an.mai@example.com', '0901123456', 'Hà Nội'),
-('hashed_pass2', 'totruong', 'Lê', 'Bình', 'binh.le@example.com', '0902233445', 'Hà Nội'),
-('hashed_pass3', 'ketoan', 'Ngô', 'Cường', 'cuong.ngo@example.com', '0903344556', 'Hà Nội'),
-('hashed_pass4', 'totruong', 'Đặng', 'Dũng', 'dung.dang@example.com', '0904455667', 'HCM'),
-('hashed_pass5', 'ketoan', 'Trần', 'Hà', 'ha.tran@example.com', '0905566778', 'Đà Nẵng');
+('1', 'ketoan', 'Mai', 'An', 'an.mai@example.com', '0901123456', 'Hà Nội'),
+('1', 'totruong', 'Lê', 'Bình', 'binh.le@example.com', '0902233445', 'Hà Nội'),
+('1', 'ketoan', 'Ngô', 'Cường', 'cuong.ngo@example.com', '0903344556', 'Hà Nội'),
+('1', 'totruong', 'Đặng', 'Dũng', 'dung.dang@example.com', '0904455667', 'HCM'),
+('1', 'ketoan', 'Trần', 'Hà', 'ha.tran@example.com', '0905566778', 'Đà Nẵng');
