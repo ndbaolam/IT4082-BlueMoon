@@ -117,7 +117,7 @@ export const Sidebar = ({ userRole, onLogout }: SidebarProps) => {
         <div className="flex items-center space-x-3">
           <div className="relative">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Building2 className="w-6 h-6 text-white" />
+              <Building2 className="w-6 h-6 text-white" />  
             </div>
             <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
               <Sparkles className="w-2 h-2 text-white" />
