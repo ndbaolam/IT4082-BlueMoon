@@ -34,10 +34,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 interface HoKhau {
   id: number;
   sohokhau: string;
-  sonha: string;
-  duong: string;
-  phuong: string;
-  quan: string;
+  sophong: string;
   ngaylamhokhau: string;
   chu_ho_id: number;
   chu_ho_name?: string;
@@ -84,8 +81,7 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
   const filteredHouseholds = households.filter(
     (household) =>
       household.sohokhau.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      household.chu_ho_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      household.duong.toLowerCase().includes(searchTerm.toLowerCase())
+      household.chu_ho_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleCreate = () => {
@@ -209,8 +205,7 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
                       {household.sohokhau}
                     </TableCell>
                     <TableCell>
-                      {household.sonha} {household.duong}, {household.phuong},{" "}
-                      {household.quan}
+                      {household.sophong}
                     </TableCell>
                     <TableCell>{household.chu_ho_name}</TableCell>
                     <TableCell>
@@ -268,47 +263,14 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="sonha">Số nhà</Label>
+                <Label htmlFor="sophong">Số phòng</Label>
                 <Input
-                  id="sonha"
-                  value={formData.sonha || ""}
+                  id="sophong"
+                  value={formData.sophong || ""}
                   onChange={(e) =>
-                    setFormData({ ...formData, sonha: e.target.value })
+                    setFormData({ ...formData, sophong: e.target.value })
                   }
-                  placeholder="Số nhà"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="duong">Đường</Label>
-                <Input
-                  id="duong"
-                  value={formData.duong || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, duong: e.target.value })
-                  }
-                  placeholder="Tên đường"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phuong">Phường</Label>
-                <Input
-                  id="phuong"
-                  value={formData.phuong || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phuong: e.target.value })
-                  }
-                  placeholder="Tên phường"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="quan">Quận</Label>
-                <Input
-                  id="quan"
-                  value={formData.quan || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, quan: e.target.value })
-                  }
-                  placeholder="Tên quận"
+                  placeholder="Số phòng"
                 />
               </div>
               <div className="space-y-2">

@@ -8,10 +8,7 @@ class HoKhau(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     sohokhau = Column(String(20), unique=True, nullable=False)
-    sonha = Column(String(100), nullable=True)
-    duong = Column(String(100), nullable=True)
-    phuong = Column(String(100), nullable=True)
-    quan = Column(String(100), nullable=True)
+    sophong = Column(String(100), nullable=True)
     ngaylamhokhau = Column(Date, nullable=True)
     chu_ho_id = Column(Integer, ForeignKey("nhankhau.id", ondelete="RESTRICT"), nullable=False)
     

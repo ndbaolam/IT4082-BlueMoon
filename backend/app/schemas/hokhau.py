@@ -7,10 +7,7 @@ class HoKhauBase(BaseModel):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     sohokhau: str
-    sonha: Optional[str] = None
-    duong: Optional[str] = None
-    phuong: Optional[str] = None
-    quan: Optional[str] = None
+    sophong: Optional[str] = None
     ngaylamhokhau: Optional[date] = None
     chu_ho_id: int
 
