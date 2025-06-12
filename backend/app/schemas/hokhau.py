@@ -3,6 +3,9 @@ from typing import Optional
 from datetime import date, datetime
 
 class HoKhauBase(BaseModel):
+    id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
     sohokhau: str
     sonha: Optional[str] = None
     duong: Optional[str] = None
@@ -14,10 +17,6 @@ class HoKhauBase(BaseModel):
 class HoKhauCreate(HoKhauBase):
     pass
 
-class HoKhau(HoKhauBase):
-    id: int
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-
+class HoKhau(HoKhauBase):    
     class Config:
         from_attributes = True

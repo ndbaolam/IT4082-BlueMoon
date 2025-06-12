@@ -150,6 +150,7 @@ export const PersonManagement = ({ userRole }: PersonManagementProps) => {
                   <TableHead>Ngày sinh</TableHead>
                   <TableHead>Giới tính</TableHead>
                   <TableHead>Nghề nghiệp</TableHead>
+                  <TableHead>Ghi chú</TableHead>
                   <TableHead className="text-right">Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
@@ -161,6 +162,7 @@ export const PersonManagement = ({ userRole }: PersonManagementProps) => {
                     <TableCell>{new Date(person.ngaysinh).toLocaleDateString('vi-VN')}</TableCell>
                     <TableCell>{person.gioitinh}</TableCell>
                     <TableCell>{person.nghenghiep}</TableCell>
+                    <TableCell>{person.ghichu}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-2">
                         <Button

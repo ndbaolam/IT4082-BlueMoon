@@ -1,8 +1,9 @@
 from pydantic import BaseModel, condecimal
 from typing import Optional
-from datetime import date
+from datetime import date, datetime
 
 class NopTienBase(BaseModel):
+    id: int    
     hokhau_id: int
     khoanthu_id: int
     nguoinop: str

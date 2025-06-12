@@ -1,8 +1,11 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import date
+from datetime import date, datetime
 
 class TamTruTamVangBase(BaseModel):
+    id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
     nhankhau_id: int
     trangthai: str
     diachitamtrutamvang: Optional[str] = None

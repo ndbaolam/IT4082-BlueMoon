@@ -67,7 +67,7 @@ export const PaymentManagement = ({ userRole }: PaymentManagementProps) => {
       apiClient.get("/hokhau/"),
       apiClient.get("/khoanthu/"),
     ])
-      .then(([resNopTien, resHoKhau, resKhoanThu]) => {
+      .then(([resNopTien, resHoKhau, resKhoanThu]) => {        
         // Map hokhau_id -> sohokhau
         const hoKhauMap = new Map<number, string>();
         resHoKhau.data.forEach((hk: any) => {
@@ -80,12 +80,18 @@ export const PaymentManagement = ({ userRole }: PaymentManagementProps) => {
           khoanThuMap.set(kt.id, kt.tenkhoanthu || `Khoản thu ${kt.id}`);
         });
 
-        const paymentsWithNames = resNopTien.data.map((item: any) => ({
-          ...item,
-          hokhau_name: hoKhauMap.get(item.hokhau_id) || `ID ${item.hokhau_id}`,
-          khoanthu_name:
-            khoanThuMap.get(item.khoanthu_id) || `ID ${item.khoanthu_id}`,
-        }));
+        const paymentsWithNames = resNopTien.data.map((item: any) => {
+          const khoanthu = resKhoanThu.data.find(
+            (kt: any) => kt.id === item.khoanthu_id
+          );
+          return {
+            ...item,
+            hokhau_name:
+              hoKhauMap.get(item.hokhau_id) || `ID ${item.hokhau_id}`,
+            khoanthu_name:
+              khoanthu?.tenkhoanthu || `Khoản thu ${item.khoanthu_id}`,
+          };
+        });
         setPayments(paymentsWithNames);
         setHoKhauList(resHoKhau.data);
         setKhoanThuList(resKhoanThu.data);
@@ -107,7 +113,13 @@ export const PaymentManagement = ({ userRole }: PaymentManagementProps) => {
 
   const handleCreate = () => {
     setEditingPayment(null);
-    setFormData({});
+    setFormData({
+      khoanthu_id: undefined,
+      hokhau_id: undefined,
+      nguoinop: "",
+      sotien: undefined,
+      ngaynop: "",
+    });
     setIsDialogOpen(true);
   };
 
@@ -265,8 +277,8 @@ export const PaymentManagement = ({ userRole }: PaymentManagementProps) => {
                 {filteredPayments.map((payment) => {
                   const khoanThu = khoanThuList.find(
                     (kt) => kt.id === payment.khoanthu_id
-                  );
-                  const tongPhaiNop = khoanThu?.sotien || 0;
+                  );                  
+                  const tongPhaiNop = khoanThu?.sotien || 0;                  
                   const daNop = Number(payment.sotien) || 0;
                   const conThieu = tongPhaiNop - daNop;
                   return (
@@ -292,7 +304,24 @@ export const PaymentManagement = ({ userRole }: PaymentManagementProps) => {
                         {new Date(payment.ngaynop).toLocaleDateString("vi-VN")}
                       </TableCell>
                       <TableCell className="text-right">
-                        {/* ...các nút thao tác... */}
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="text-blue-600 hover:bg-blue-50 mr-2"
+                          onClick={() => handleEdit(payment)}
+                          title="Chỉnh sửa"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="text-red-600 hover:bg-red-50"
+                          onClick={() => handleDelete(payment.id)}
+                          title="Xóa"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   );
@@ -341,13 +370,16 @@ export const PaymentManagement = ({ userRole }: PaymentManagementProps) => {
                       formData.khoanthu_id ? String(formData.khoanthu_id) : ""
                     }
                     onValueChange={(value) =>
-                      setFormData({ ...formData, khoanthu_id: parseInt(value) })
+                      setFormData({ ...formData, khoanthu_id: Number(value) })
                     }
                   >
                     <SelectTrigger id="khoanthu_id">
                       <SelectValue placeholder="Chọn khoản thu" />
                     </SelectTrigger>
                     <SelectContent>
+                      {khoanThuList.length === 0 && (
+                        <div>Không có khoản thu nào</div>
+                      )}
                       {khoanThuList.map((kt) => (
                         <SelectItem key={kt.id} value={String(kt.id)}>
                           {kt.tenkhoanthu || `Khoản thu ${kt.id}`}
