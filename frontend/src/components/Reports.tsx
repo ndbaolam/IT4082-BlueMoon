@@ -23,6 +23,9 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import apiClient from "@/axiosConfig";
+import { Pie } from "react-chartjs-2";
+import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
+Chart.register(ArcElement, Tooltip, Legend);
 
 interface ReportsProps {
   userRole: "to_truong" | "ke_toan";
@@ -31,6 +34,14 @@ interface ReportsProps {
 export const Reports = ({ userRole }: ReportsProps) => {
   const [selectedPeriod, setSelectedPeriod] = useState("month");
   const [selectedYear, setSelectedYear] = useState("2025");
+  const [showFinanceReport, setShowFinanceReport] = useState(false);
+  const [pieData, setPieData] = useState<any[]>([]);
+  const [showPersonReport, setShowPersonReport] = useState(false);
+  const [genderStats, setGenderStats] = useState({ male: 0, female: 0 });
+  const [residenceStats, setResidenceStats] = useState({
+    tamtru: 0,
+    tamvang: 0,
+  });
 
   const [reportData, setReportData] = useState({
     totalRevenue: 0,
@@ -48,6 +59,20 @@ export const Reports = ({ userRole }: ReportsProps) => {
     ]).then(([resKhoanThu, resHoKhau, resNopTien]) => {
       const households = resHoKhau.data;
       // Tổng số tiền khoản thu bắt buộc = tổng các khoản thu bắt buộc * số hộ khẩu
+      const noptien = resNopTien.data;
+      const pieChartData = resKhoanThu.data.map((kt: any) => {
+        const totalMustPay = (Number(kt.sotien) || 0) * households.length;
+        const totalPaid = noptien
+          .filter((nt: any) => nt.khoanthu_id === kt.id)
+          .reduce((sum: number, nt: any) => sum + Number(nt.sotien || 0), 0);
+        return {
+          id: kt.id,
+          tenkhoanthu: kt.tenkhoanthu,
+          totalPaid,
+          totalMustPay,
+        };
+      });
+      setPieData(pieChartData);
       const khoanThuBatBuoc = resKhoanThu.data.filter((kt: any) => kt.batbuoc);
       const totalMustPayPerHousehold = khoanThuBatBuoc.reduce(
         (sum: number, kt: any) => sum + Number(kt.sotien || 0),
@@ -116,6 +141,173 @@ export const Reports = ({ userRole }: ReportsProps) => {
       status: "Hoàn thành",
     },
   ];
+
+  if (showFinanceReport) {
+    return (
+      <div className="space-y-6 p-10">
+        <Button
+          onClick={() => setShowFinanceReport(false)}
+          className="mb-4"
+          variant="outline"
+        >
+          ← Quay lại
+        </Button>
+        <h1 className="text-2xl font-bold mb-6 text-center">
+          Biểu đồ thu chi từng khoản thu
+        </h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {pieData.map((kt) => (
+            <div
+              key={kt.id}
+              className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center border border-gray-100 hover:shadow-2xl transition-shadow duration-200"
+            >
+              <div className="font-semibold mb-2 text-center text-base text-gray-800">
+                {kt.tenkhoanthu}
+              </div>
+              <div className="w-48 h-48 flex items-center justify-center">
+                <Pie
+                  data={{
+                    labels: ["Đã nộp", "Chưa nộp"],
+                    datasets: [
+                      {
+                        data: [
+                          kt.totalPaid,
+                          Math.max(kt.totalMustPay - kt.totalPaid, 0),
+                        ],
+                        backgroundColor: ["#22c55e", "#f87171"],
+                        borderWidth: 2,
+                        borderColor: ["#e5e7eb", "#e5e7eb"],
+                      },
+                    ],
+                  }}
+                  options={{
+                    plugins: {
+                      legend: {
+                        position: "bottom",
+                        labels: { font: { size: 14 } },
+                      },
+                      tooltip: { enabled: true },
+                    },
+                    cutout: "60%",
+                    responsive: true,
+                    maintainAspectRatio: false,
+                  }}
+                />
+              </div>
+              <div className="flex justify-between w-full text-sm mt-4 px-2">
+                <span className="text-green-600 font-medium">
+                  Đã nộp: {formatCurrency(kt.totalPaid)}
+                </span>
+                <span className="text-red-500 font-medium">
+                  Chưa nộp:{" "}
+                  {formatCurrency(Math.max(kt.totalMustPay - kt.totalPaid, 0))}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (showPersonReport) {
+    return (
+      <div className="space-y-6 p-10">
+        <Button
+          onClick={() => setShowPersonReport(false)}
+          className="mb-4"
+          variant="outline"
+        >
+          ← Quay lại
+        </Button>
+        <h1 className="text-2xl font-bold mb-6 text-center">
+          Biểu đồ nhân khẩu
+        </h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center border border-gray-100">
+            <div className="font-semibold mb-2 text-center text-base text-gray-800">
+              Tỷ lệ giới tính
+            </div>
+            <div className="w-48 h-48 flex items-center justify-center">
+              <Pie
+                data={{
+                  labels: ["Nam", "Nữ"],
+                  datasets: [
+                    {
+                      data: [genderStats.male, genderStats.female],
+                      backgroundColor: ["#3b82f6", "#f472b6"],
+                      borderWidth: 2,
+                      borderColor: ["#e5e7eb", "#e5e7eb"],
+                    },
+                  ],
+                }}
+                options={{
+                  plugins: {
+                    legend: {
+                      position: "bottom",
+                      labels: { font: { size: 14 } },
+                    },
+                    tooltip: { enabled: true },
+                  },
+                  cutout: "60%",
+                  responsive: true,
+                  maintainAspectRatio: false,
+                }}
+              />
+            </div>
+            <div className="flex justify-between w-full text-sm mt-4 px-2">
+              <span className="text-blue-600 font-medium">
+                Nam: {genderStats.male}
+              </span>
+              <span className="text-pink-500 font-medium">
+                Nữ: {genderStats.female}
+              </span>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center border border-gray-100">
+            <div className="font-semibold mb-2 text-center text-base text-gray-800">
+              Tỷ lệ tạm trú / tạm vắng
+            </div>
+            <div className="w-48 h-48 flex items-center justify-center">
+              <Pie
+                data={{
+                  labels: ["Tạm trú", "Tạm vắng"],
+                  datasets: [
+                    {
+                      data: [residenceStats.tamtru, residenceStats.tamvang],
+                      backgroundColor: ["#34d399", "#fbbf24"],
+                      borderWidth: 2,
+                      borderColor: ["#e5e7eb", "#e5e7eb"],
+                    },
+                  ],
+                }}
+                options={{
+                  plugins: {
+                    legend: {
+                      position: "bottom",
+                      labels: { font: { size: 14 } },
+                    },
+                    tooltip: { enabled: true },
+                  },
+                  cutout: "60%",
+                  responsive: true,
+                  maintainAspectRatio: false,
+                }}
+              />
+            </div>
+            <div className="flex justify-between w-full text-sm mt-4 px-2">
+              <span className="text-green-600 font-medium">
+                Tạm trú: {residenceStats.tamtru}
+              </span>
+              <span className="text-yellow-500 font-medium">
+                Tạm vắng: {residenceStats.tamvang}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 p-10">
@@ -246,7 +438,11 @@ export const Reports = ({ userRole }: ReportsProps) => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 gap-3">
-              <Button variant="outline" className="justify-start h-auto p-4">
+              <Button
+                variant="outline"
+                className="justify-start h-auto p-4"
+                onClick={() => setShowFinanceReport(true)}
+              >
                 <div className="flex items-center space-x-3">
                   <FileText className="w-5 h-5 text-blue-600" />
                   <div className="text-left">
@@ -258,7 +454,30 @@ export const Reports = ({ userRole }: ReportsProps) => {
                 </div>
               </Button>
 
-              <Button variant="outline" className="justify-start h-auto p-4">
+              <Button
+                variant="outline"
+                className="justify-start h-auto p-4"
+                onClick={async () => {
+                  // Lấy dữ liệu nhân khẩu và tạm trú/tạm vắng
+                  const [resNK, resTTTV] = await Promise.all([
+                    apiClient.get("/nhankhau/"),
+                    apiClient.get("/tamtrutamvang/"),
+                  ]);
+                  // Thống kê giới tính
+                  const male = resNK.data.filter(
+                    (nk: any) => nk.gioitinh === "Nam"
+                  ).length;
+                  const female = resNK.data.filter(
+                    (nk: any) => nk.gioitinh === "Nữ"
+                  ).length;
+                  setGenderStats({ male, female });
+                  // Thống kê tạm trú/tạm vắng
+                  const tamtru = resTTTV.data.filter((r: any) => r.trangthai === "tạm trú").length;
+                  const tamvang = resTTTV.data.filter((r: any) => r.trangthai === "tạm vắng").length;
+                  setResidenceStats({ tamtru, tamvang });
+                  setShowPersonReport(true);
+                }}
+              >
                 <div className="flex items-center space-x-3">
                   <Users className="w-5 h-5 text-green-600" />
                   <div className="text-left">
