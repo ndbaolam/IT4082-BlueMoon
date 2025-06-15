@@ -59,6 +59,7 @@ export const PaymentManagement = ({ userRole }: PaymentManagementProps) => {
   const [editingPayment, setEditingPayment] = useState<NopTien | null>(null);
   const [formData, setFormData] = useState<Partial<NopTien>>({});
   const { toast } = useToast();
+  
 
   // Lấy danh sách phiếu nộp tiền từ API khi load component
   useEffect(() => {
@@ -67,7 +68,7 @@ export const PaymentManagement = ({ userRole }: PaymentManagementProps) => {
       apiClient.get("/hokhau/"),
       apiClient.get("/khoanthu/"),
     ])
-      .then(([resNopTien, resHoKhau, resKhoanThu]) => {        
+      .then(([resNopTien, resHoKhau, resKhoanThu]) => {
         // Map hokhau_id -> sohokhau
         const hoKhauMap = new Map<number, string>();
         resHoKhau.data.forEach((hk: any) => {
@@ -267,6 +268,7 @@ export const PaymentManagement = ({ userRole }: PaymentManagementProps) => {
                   <TableHead>Hộ khẩu</TableHead>
                   <TableHead>Khoản thu</TableHead>
                   <TableHead>Người nộp</TableHead>
+                  <TableHead>Tổng phải nộp</TableHead>
                   <TableHead>Số tiền đã nộp</TableHead>
                   <TableHead>Số tiền còn thiếu</TableHead>
                   <TableHead>Ngày nộp</TableHead>
@@ -277,8 +279,8 @@ export const PaymentManagement = ({ userRole }: PaymentManagementProps) => {
                 {filteredPayments.map((payment) => {
                   const khoanThu = khoanThuList.find(
                     (kt) => kt.id === payment.khoanthu_id
-                  );                  
-                  const tongPhaiNop = khoanThu?.sotien || 0;                  
+                  );
+                  const tongPhaiNop = khoanThu?.sotien || 0;
                   const daNop = Number(payment.sotien) || 0;
                   const conThieu = tongPhaiNop - daNop;
                   return (
@@ -288,6 +290,9 @@ export const PaymentManagement = ({ userRole }: PaymentManagementProps) => {
                       </TableCell>
                       <TableCell>{payment.khoanthu_name}</TableCell>
                       <TableCell>{payment.nguoinop}</TableCell>
+                      <TableCell className="font-semibold text-blue-600">
+                        {formatCurrency(tongPhaiNop)}
+                      </TableCell>
                       <TableCell className="font-semibold text-green-600">
                         {formatCurrency(daNop)}
                       </TableCell>

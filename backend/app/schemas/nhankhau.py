@@ -13,6 +13,7 @@ class NhanKhauBase(BaseModel):
     noicap: Optional[str]
     nghenghiep: Optional[str]
     ghichu: Optional[str]
+    hokhau_id: Optional[int] = None    
 
 class NhanKhauCreate(NhanKhauBase):
     pass

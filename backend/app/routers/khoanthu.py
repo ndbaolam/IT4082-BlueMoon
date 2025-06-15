@@ -46,3 +46,7 @@ def delete_khoanthu(khoanthu_id: int, db: Session = Depends(get_db)):
     if not deleted:
         raise HTTPException(status_code=404, detail="Không tìm thấy khoản thu để xoá")
     return deleted
+
+@router.get("/{khoanthu_id}/household-status")
+def get_household_payment_status(khoanthu_id: int, db: Session = Depends(get_db)):
+    return controller.get_household_payment_status(khoanthu_id, db)

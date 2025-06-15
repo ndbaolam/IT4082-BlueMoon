@@ -29,7 +29,13 @@ import {
 import { Plus, Edit, Trash2, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import apiClient from "@/axiosConfig";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 interface HoKhau {
   id: number;
@@ -38,6 +44,7 @@ interface HoKhau {
   ngaylamhokhau: string;
   chu_ho_id: number;
   chu_ho_name?: string;
+  so_nhan_khau?: number;
 }
 
 interface HouseholdManagementProps {
@@ -51,22 +58,48 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingHousehold, setEditingHousehold] = useState<HoKhau | null>(null);
   const [formData, setFormData] = useState<Partial<HoKhau>>({});
+  const [selectedHousehold, setSelectedHousehold] = useState<HoKhau | null>(
+    null
+  );
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [householdMembers, setHouseholdMembers] = useState<any[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
     Promise.all([apiClient.get("/hokhau"), apiClient.get("/nhankhau")])
       .then(([resHoKhau, resNhanKhau]) => {
-        // Map chu_ho_id -> hoten
         const nhanKhauMap = new Map<number, string>();
         resNhanKhau.data.forEach((nk: any) => {
-          nhanKhauMap.set(nk.id, nk.hoten || `Nhân khẩu ${nk.id}`);
+          nhanKhauMap.set(Number(nk.id), nk.hoten || `Nhân khẩu ${nk.id}`);
         });
 
-        const householdsWithChuHoName = resHoKhau.data.map((hk: any) => ({
-          ...hk,
-          chu_ho_name: nhanKhauMap.get(hk.chu_ho_id) || `ID ${hk.chu_ho_id}`,
-        }));
+        // Map hộ khẩu id -> danh sách id nhân khẩu thuộc hộ đó
+        const hoKhauIdToNhanKhauIds = new Map<number, Set<number>>();
+        resNhanKhau.data.forEach((nk: any) => {
+          const hkId = Number(nk.hokhau_id);
+          const nkId = Number(nk.id);
+          if (!isNaN(hkId)) {
+            if (!hoKhauIdToNhanKhauIds.has(hkId)) {
+              hoKhauIdToNhanKhauIds.set(hkId, new Set());
+            }
+            hoKhauIdToNhanKhauIds.get(hkId)!.add(nkId);
+          }
+        });
 
+        const householdsWithChuHoName = resHoKhau.data.map((hk: any) => {
+          const hkId = Number(hk.id);
+          const chuHoId = Number(hk.chu_ho_id);
+          const nhanKhauIds = hoKhauIdToNhanKhauIds.get(hkId) || new Set();
+          // Nếu chủ hộ chưa nằm trong danh sách nhân khẩu của hộ này thì cộng thêm 1
+          const so_nhan_khau = nhanKhauIds.has(chuHoId)
+            ? nhanKhauIds.size
+            : nhanKhauIds.size + 1;
+          return {
+            ...hk,
+            chu_ho_name: nhanKhauMap.get(chuHoId) || `ID ${hk.chu_ho_id}`,
+            so_nhan_khau,
+          };
+        });
         setHouseholds(householdsWithChuHoName);
         setNhanKhauList(resNhanKhau.data);
       })
@@ -193,22 +226,29 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Số hộ khẩu</TableHead>
-                  <TableHead>Địa chỉ</TableHead>
+                  <TableHead>Số phòng</TableHead>
                   <TableHead>Chủ hộ</TableHead>
+                  <TableHead>Số nhân khẩu</TableHead>
                   <TableHead>Ngày lập</TableHead>
                   <TableHead className="text-right">Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredHouseholds.map((household) => (
-                  <TableRow key={household.id} className="hover:bg-gray-50/50">
+                  <TableRow
+                    key={household.id}
+                    className="hover:bg-gray-50/50 cursor-pointer"
+                    onClick={() => {
+                      setSelectedHousehold(household);
+                      setIsDetailDialogOpen(true);
+                    }}
+                  >
                     <TableCell className="font-medium">
                       {household.sohokhau}
                     </TableCell>
-                    <TableCell>
-                      {household.sophong}
-                    </TableCell>
+                    <TableCell>{household.sophong}</TableCell>
                     <TableCell>{household.chu_ho_name}</TableCell>
+                    <TableCell>{household.so_nhan_khau}</TableCell>
                     <TableCell>
                       {new Date(household.ngaylamhokhau).toLocaleDateString(
                         "vi-VN"
@@ -219,7 +259,10 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleEdit(household)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(household);
+                          }}
                           className="text-blue-600 border-blue-200 hover:bg-blue-50"
                         >
                           <Edit className="w-4 h-4" />
@@ -227,7 +270,10 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleDelete(household.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(household.id);
+                          }}
                           className="text-red-600 border-red-200 hover:bg-red-50"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -320,6 +366,100 @@ export const HouseholdManagement = ({ userRole }: HouseholdManagementProps) => {
           </DialogContent>
         </Dialog>
       </div>
+      <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Chi tiết hộ khẩu</DialogTitle>
+          </DialogHeader>
+          {selectedHousehold && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4 bg-blue-50/50 rounded-lg p-4">
+                <div>
+                  <div className="text-gray-500 text-sm">Số hộ khẩu</div>
+                  <div className="font-semibold text-lg text-blue-700">
+                    {selectedHousehold.sohokhau}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-gray-500 text-sm">Số phòng</div>
+                  <div className="font-semibold text-lg">
+                    {selectedHousehold.sophong}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-gray-500 text-sm">Ngày lập</div>
+                  <div className="font-semibold">
+                    {new Date(
+                      selectedHousehold.ngaylamhokhau
+                    ).toLocaleDateString("vi-VN")}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-gray-500 text-sm">Chủ hộ</div>
+                  <div className="font-semibold text-blue-600">
+                    {selectedHousehold.chu_ho_name}
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div className="font-semibold mb-2 text-gray-700">
+                  Thành viên hộ khẩu
+                </div>
+                <div className="overflow-x-auto rounded-lg border border-gray-200">
+                  <table className="min-w-full bg-white">
+                    <thead>
+                      <tr className="bg-blue-100 text-blue-700">
+                        <th className="py-2 px-4 text-left">Họ tên</th>
+                        <th className="py-2 px-4 text-left">CCCD</th>
+                        <th className="py-2 px-4 text-left">Giới tính</th>
+                        <th className="py-2 px-4 text-left">Ngày sinh</th>
+                        <th className="py-2 px-4 text-left">Quan hệ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {nhanKhauList
+                        .filter(
+                          (nk) =>
+                            Number(nk.hokhau_id) === selectedHousehold.id ||
+                            Number(nk.id) === selectedHousehold.chu_ho_id
+                        )
+                        .map((nk) => (
+                          <tr key={nk.id} className="border-t">
+                            <td className="py-2 px-4">{nk.hoten}</td>
+                            <td className="py-2 px-4">{nk.cccd || "N/A"}</td>
+                            <td className="py-2 px-4">
+                              {nk.gioitinh || "N/A"}
+                            </td>
+                            <td className="py-2 px-4">
+                              {nk.ngaysinh
+                                ? new Date(nk.ngaysinh).toLocaleDateString(
+                                    "vi-VN"
+                                  )
+                                : "N/A"}
+                            </td>
+                            <td className="py-2 px-4">
+                              {Number(nk.id) === selectedHousehold.chu_ho_id
+                                ? "Chủ hộ"
+                                : "Thành viên"}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsDetailDialogOpen(false)}
+            >
+              Đóng
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

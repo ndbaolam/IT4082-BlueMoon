@@ -54,6 +54,20 @@ export const FeeManagement = ({ userRole }: FeeManagementProps) => {
   const [editingFee, setEditingFee] = useState<KhoanThu | null>(null);
   const [formData, setFormData] = useState<Partial<KhoanThu>>({});
   const { toast } = useToast();
+  const [selectedFee, setSelectedFee] = useState<KhoanThu | null>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [paidHouseholds, setPaidHouseholds] = useState<any[]>([]);
+  const [unpaidHouseholds, setUnpaidHouseholds] = useState<any[]>([]);
+
+  const handleViewDetail = (fee: KhoanThu) => {
+    setSelectedFee(fee);
+    setIsDetailDialogOpen(true);
+    // Gọi API lấy danh sách hộ khẩu đã/ chưa đóng
+    apiClient.get(`/khoanthu/${fee.id}/household-status`).then((res) => {
+      setPaidHouseholds(res.data.paid || []);
+      setUnpaidHouseholds(res.data.unpaid || []);
+    });
+  };
 
   useEffect(() => {
     apiClient
@@ -229,6 +243,14 @@ export const FeeManagement = ({ userRole }: FeeManagementProps) => {
                         <Button
                           variant="outline"
                           size="sm"
+                          onClick={() => handleViewDetail(fee)}
+                          className="text-green-600 border-green-200 hover:bg-green-50"
+                        >
+                          Xem chi tiết
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => handleEdit(fee)}
                           className="text-blue-600 border-blue-200 hover:bg-blue-50"
                         >
@@ -336,6 +358,133 @@ export const FeeManagement = ({ userRole }: FeeManagementProps) => {
           </DialogContent>
         </Dialog>
       </div>
+      <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Chi tiết khoản thu</DialogTitle>
+          </DialogHeader>
+          {selectedFee && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4 bg-orange-50/60 rounded-lg p-4">
+                <div>
+                  <div className="text-gray-500 text-sm">Tên khoản thu</div>
+                  <div className="font-semibold text-lg text-orange-700">
+                    {selectedFee.tenkhoanthu}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-gray-500 text-sm">Số tiền</div>
+                  <div className="font-semibold text-lg">
+                    {selectedFee.sotien?.toLocaleString("vi-VN")} VNĐ
+                  </div>
+                </div>
+                <div>
+                  <div className="text-gray-500 text-sm">Thời hạn</div>
+                  <div className="font-semibold">
+                    {selectedFee.thoihan
+                      ? new Date(selectedFee.thoihan).toLocaleDateString(
+                          "vi-VN"
+                        )
+                      : "Không có"}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-gray-500 text-sm">Loại</div>
+                  <div className="font-semibold">
+                    <Badge
+                      variant={
+                        selectedFee.batbuoc ? "destructive" : "secondary"
+                      }
+                    >
+                      {selectedFee.batbuoc ? "Bắt buộc" : "Tự nguyện"}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="col-span-2">
+                  <div className="text-gray-500 text-sm">Ghi chú</div>
+                  <div className="font-semibold">
+                    {selectedFee.ghichu || "Không có"}
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                <div>
+                  <div className="font-semibold mb-2 text-green-700 flex items-center">
+                    <DollarSign className="w-4 h-4 mr-1 text-green-600" /> Hộ
+                    khẩu đã đóng
+                  </div>
+                  <div className="overflow-x-auto rounded-lg border border-green-200 bg-green-50/30">
+                    <table className="min-w-full">
+                      <thead>
+                        <tr className="bg-green-100 text-green-700">
+                          <th className="py-2 px-4 text-left">Số hộ khẩu</th>
+                          <th className="py-2 px-4 text-left">Chủ hộ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {paidHouseholds.length === 0 ? (
+                          <tr>
+                            <td colSpan={2} className="py-2 px-4 text-gray-500">
+                              Chưa có hộ khẩu nào đóng
+                            </td>
+                          </tr>
+                        ) : (
+                          paidHouseholds.map((hk) => (
+                            <tr key={hk.id} className="border-t">
+                              <td className="py-2 px-4">{hk.sohokhau}</td>
+                              <td className="py-2 px-4">{hk.chu_ho_name}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div>
+                  <div className="font-semibold mb-2 text-red-700 flex items-center">
+                    <DollarSign className="w-4 h-4 mr-1 text-red-600" /> Hộ khẩu
+                    chưa đóng
+                  </div>
+                  <div className="overflow-x-auto rounded-lg border border-red-200 bg-red-50/30">
+                    <table className="min-w-full">
+                      <thead>
+                        <tr className="bg-red-100 text-red-700">
+                          <th className="py-2 px-4 text-left">Số hộ khẩu</th>
+                          <th className="py-2 px-4 text-left">Chủ hộ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {unpaidHouseholds.length === 0 ? (
+                          <tr>
+                            <td colSpan={2} className="py-2 px-4 text-gray-500">
+                              Tất cả hộ khẩu đã đóng
+                            </td>
+                          </tr>
+                        ) : (
+                          unpaidHouseholds.map((hk) => (
+                            <tr key={hk.id} className="border-t">
+                              <td className="py-2 px-4">{hk.sohokhau}</td>
+                              <td className="py-2 px-4">{hk.chu_ho_name}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsDetailDialogOpen(false)}
+            >
+              Đóng
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

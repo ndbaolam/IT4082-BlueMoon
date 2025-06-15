@@ -32,11 +32,24 @@ interface PersonManagementProps {
 
 export const PersonManagement = ({ userRole }: PersonManagementProps) => {
   const [persons, setPersons] = useState<NhanKhau[]>([]);
+  const [households, setHouseholds] = useState<any[]>([]);
+  const [personHouseholdMap, setPersonHouseholdMap] = useState<Record<number, string>>({});
+
 
   useEffect(() => {
     apiClient.get("/nhankhau")
       .then(res => setPersons(res.data))
       .catch(() => toast({ title: "Lỗi", description: "Không lấy được danh sách nhân khẩu" }));
+    apiClient.get("/hokhau")
+    .then(res => {
+      setHouseholds(res.data);
+      // Map nhankhau_id (chủ hộ) -> số hộ khẩu
+      const map: Record<number, string> = {};
+      res.data.forEach((hk: any) => {
+        if (hk.chu_ho_id) map[hk.chu_ho_id] = hk.sohokhau;
+      });
+      setPersonHouseholdMap(map);
+    });
   }, []);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -146,6 +159,7 @@ export const PersonManagement = ({ userRole }: PersonManagementProps) => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Họ và tên</TableHead>
+                  <TableHead>Hộ khẩu</TableHead>
                   <TableHead>CCCD</TableHead>
                   <TableHead>Ngày sinh</TableHead>
                   <TableHead>Giới tính</TableHead>
@@ -158,6 +172,7 @@ export const PersonManagement = ({ userRole }: PersonManagementProps) => {
                 {filteredPersons.map((person) => (
                   <TableRow key={person.id} className="hover:bg-gray-50/50">
                     <TableCell className="font-medium">{person.hoten}</TableCell>
+                    <TableCell>{personHouseholdMap[person.id] || ""}</TableCell>
                     <TableCell>{person.cccd}</TableCell>
                     <TableCell>{new Date(person.ngaysinh).toLocaleDateString('vi-VN')}</TableCell>
                     <TableCell>{person.gioitinh}</TableCell>
