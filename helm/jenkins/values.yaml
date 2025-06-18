@@ -1,3 +1,6 @@
-service:
-  type: NodePort
-  nodePort: 30009
+controller:
+  serviceType: NodePort
+  servicePort: 8080
+  nodePort: 30069
+
+  jenkinsUrl: http://192.168.39.109:30069

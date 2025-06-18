@@ -3,13 +3,13 @@ pipeline {
 
   environment {
     IMAGE = "ndbaolam/bluemoon-be"
-    TAG = "${env.BUILD_NUMBER}"
+    TAG = ""
   }
 
   stages {
     stage('Checkout') {
       steps {
-        git url: 'https://github.com/youruser/your-repo.git', branch: 'main'
+        git url: 'https://github.com/ndbaolam/IT4082-BlueMoon', branch: 'main'
       }
     }
 
