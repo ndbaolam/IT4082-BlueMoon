@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: insert-sample-data
+  namespace: ktpm
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      containers:
+        - name: seed
+          image: postgres:16-alpine
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Waiting for PostgreSQL...";
+              until pg_isready -h db-service -p 5432 -U ktpm; do
+                sleep 2;
+              done;
+              echo "Running SQL script...";
+              psql -h db-service -U ktpm -d ktpm -f /sql/init.sql
+          env:
+            - name: PGPASSWORD
+              value: ktpm
+          volumeMounts:
+            - name: sql-script
+              mountPath: /sql
+      restartPolicy: Never
+      volumes:
+        - name: sql-script
+          configMap:
+            name: init-sql

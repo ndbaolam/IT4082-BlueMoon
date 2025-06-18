@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: be-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: be
+  template:
+    metadata:
+      labels:
+        app: be
+    spec:
+      containers:
+      - name: be-container
+        image: {{ .Values.be.image }}
+        env:
+          - name: POSTGRES_USER
+            value: {{ .Values.db.env.POSTGRES_USER }}
+          - name: POSTGRES_PASSWORD
+            value: {{ .Values.db.env.POSTGRES_PASSWORD }}
+          - name: POSTGRES_DB
+            value: {{ .Values.db.env.POSTGRES_DB }}
+          - name: DATABASE_URL
+            value: {{ .Values.be.env.DATABASE_URL }}
+          - name: SECRET_KEY
+            value: {{ .Values.be.env.SECRET_KEY }}
+          - name: ALGORITHM
+            value: {{ .Values.be.env.ALGORITHM }}
+          - name: ACCESS_TOKEN_EXPIRE_MINUTES
+            value: "{{ .Values.be.env.ACCESS_TOKEN_EXPIRE_MINUTES }}"
+        ports:
+        - containerPort: {{ .Values.be.service.port }}

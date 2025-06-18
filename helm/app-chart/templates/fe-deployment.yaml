@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fe-deployment
+spec:
+  replicas: {{ .Values.fe.replicaCount }}
+  selector:
+    matchLabels:
+      app: fe
+  template:
+    metadata:
+      labels:
+        app: fe
+    spec:
+      containers:
+      - name: fe-container
+        image: {{ .Values.fe.image }}
+        env:
+        - name: VITE_API_URL
+          value: {{ .Values.fe.env.VITE_API_URL }}
+        ports:
+        - containerPort: {{ .Values.fe.service.port }}

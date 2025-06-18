@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: be-deployment
+  namespace: ktpm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: be
+  template:
+    metadata:
+      labels:
+        app: be
+    spec:
+      containers:
+      - name: be-container
+        image: ndbaolam/bluemoon-fe:latest        
+        env:
+          - name: POSTGRES_USER
+            value: ktpm
+          - name: POSTGRES_PASSWORD
+            value: ktpm
+          - name: POSTGRES_DB
+            value: ktpm
+          - name: DATABASE_URL
+            value: postgresql://ktpm:ktpm@db-service:5432/ktpm
+          - name: SECRET_KEY
+            value: secret-key
+          - name: ALGORITHM
+            value: HS256
+          - name: ACCESS_TOKEN_EXPIRE_MINUTES
+            value: '60'
+        ports:
+        - containerPort: 8000
