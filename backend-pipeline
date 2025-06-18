@@ -3,7 +3,6 @@ pipeline {
 
   environment {
     IMAGE = "ndbaolam/bluemoon-be"
-    TAG = ""
   }
 
   stages {
@@ -13,49 +12,43 @@ pipeline {
       }
     }
 
-    stage('Check backend changes') {
-      steps {
-        script {
-          def changed = sh(script: "git diff --name-only HEAD~1 HEAD | grep '^backend/' || true", returnStdout: true).trim()
-          if (!changed) {
-            echo "No changes in backend/, skipping build"
-            currentBuild.result = 'SUCCESS'
-            currentBuild.description = "No BE changes"
-            skipRemainingStages = true
-          }
-        }
-      }
-    }
+    // stage('Check backend changes') {
+    //   steps {
+    //     script {
+    //       def changed = sh(script: "git diff --name-only HEAD~1 HEAD | grep '^backend/' || true", returnStdout: true).trim()
+    //       if (!changed) {
+    //         echo "No changes in backend/, skipping build"
+    //         currentBuild.result = 'SUCCESS'
+    //         currentBuild.description = "No BE changes"
+    //         skipRemainingStages = true
+    //       }
+    //     }
+    //   }
+    // }
 
     stage('Get Commit ID') {
       steps {
         script {
-          COMMIT_HASH = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
-          env.TAG = COMMIT_HASH
+          def commitHash = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+          env.TAG = commitHash
           echo "Docker tag will be: ${env.TAG}"
         }
       }
     }
 
     stage('Build & Push Docker Image') {
-      when {
-        expression { return !binding.hasVariable('skipRemainingStages') }
-      }
+      // when {
+      //   expression { return !binding.hasVariable('skipRemainingStages') }
+      // }
       steps {
-        dir('backend') {
-          script {
-            withCredentials([usernamePassword(
-              credentialsId: 'dockerhubid',
-              usernameVariable: 'USER',
-              passwordVariable: 'PASS'
-            )]) {
-              sh """
-              docker build -t ${IMAGE}:${TAG} .
-              echo "$PASS" | docker login -u "$USER" --password-stdin
-              docker push ${IMAGE}:${TAG}
-              """
-            }
-          }
+        container('kaniko') {
+          sh """
+            /kaniko/executor \
+              --context=./backend \
+              --dockerfile=./backend/Dockerfile \
+              --destination=${env.IMAGE}:${env.TAG} \
+              --skip-tls-verify
+          """
         }
       }
     }

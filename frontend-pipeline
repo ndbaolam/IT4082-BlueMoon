@@ -1,9 +1,40 @@
 pipeline {
-  agent any
+  agent {
+    kubernetes {            
+      yaml """
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          namespace: ktpm
+        spec:
+          containers:              
+          # Kaniko để build image          
+          - name: kaniko
+            image: gcr.io/kaniko-project/executor:debug
+            imagePullPolicy: Always
+            command: [sleep]
+            args: [9999999]
+            volumeMounts:
+            - name: workspace-volume
+              mountPath: /home/jenkins/agent
+            - name: docker-config
+              mountPath: /kaniko/.docker/
+          volumes:          
+          - name: workspace-volume
+            emptyDir: {}          
+          - name: docker-config
+            secret:
+              secretName: dockerhub-credentials
+              items:
+                - key: .dockerconfigjson
+                  path: config.json
+        """
+    }
+  }
+
 
   environment {
-    IMAGE = "ndbaolam/bluemoon-fe"
-    TAG = ""
+    IMAGE = "ndbaolam/bluemoon-fe"    
   }
 
   stages {
@@ -13,49 +44,40 @@ pipeline {
       }
     }
 
-    stage('Check frontend changes') {
-      steps {
-        script {
-          def changed = sh(script: "git diff --name-only HEAD~1 HEAD | grep '^frontend/' || true", returnStdout: true).trim()
-          if (!changed) {
-            echo "No changes in frontend/, skipping build"
-            currentBuild.result = 'SUCCESS'
-            currentBuild.description = "No FE changes"
-            skipRemainingStages = true
-          }
-        }
-      }
-    }
+    // stage('Check frontend changes') {
+    //   steps {
+    //     script {
+    //       def changed = sh(script: "git diff --name-only HEAD~1 HEAD | grep '^frontend/' || true", returnStdout: true).trim()
+    //       if (!changed) {
+    //         echo "No changes in frontend/, skipping build"
+    //         currentBuild.result = 'SUCCESS'
+    //         currentBuild.description = "No FE changes"
+    //         skipRemainingStages = true
+    //       }
+    //     }
+    //   }
+    // }
 
     stage('Get Commit ID') {
       steps {
         script {
-          COMMIT_HASH = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
-          env.TAG = COMMIT_HASH
+          def commitHash = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+          env.TAG = commitHash
           echo "Docker tag will be: ${env.TAG}"
         }
       }
     }
 
-    stage('Build & Push Docker Image') {
-      when {
-        expression { return !binding.hasVariable('skipRemainingStages') }
-      }
+    stage('Build & Push Docker Image') {      
       steps {
-        dir('frontend') {
-          script {
-            withCredentials([usernamePassword(
-              credentialsId: 'dockerhubid',
-              usernameVariable: 'USER',
-              passwordVariable: 'PASS'
-            )]) {
-              sh """
-              docker build -t ${IMAGE}:${TAG} .
-              echo "$PASS" | docker login -u "$USER" --password-stdin
-              docker push ${IMAGE}:${TAG}
-              """
-            }
-          }
+        container('kaniko') {
+          sh """
+            /kaniko/executor \
+              --context=./frontend \
+              --dockerfile=./frontend/Dockerfile \
+              --destination=${env.IMAGE}:${env.TAG} \
+              --skip-tls-verify
+          """
         }
       }
     }
