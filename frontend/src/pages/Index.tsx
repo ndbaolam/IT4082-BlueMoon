@@ -17,7 +17,7 @@ import apiClient from '../axiosConfig.ts'
 import { useAuth } from '@/context/AuthContext';
 
 const Index = () => {  
-  console.log("Test CICD")
+  console.log("Test CI-CD Frontend")
   const {userRole, setUserRole, isLoggedIn, setIsLoggedIn } = useAuth()
   const navigate = useNavigate();
   const location = useLocation();  

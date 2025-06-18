@@ -1,5 +1,36 @@
 pipeline {
-  agent any
+  agent {
+    kubernetes {            
+      yaml """
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          namespace: ktpm
+        spec:
+          containers:              
+          # Kaniko để build image          
+          - name: kaniko
+            image: gcr.io/kaniko-project/executor:debug
+            imagePullPolicy: Always
+            command: [sleep]
+            args: [9999999]
+            volumeMounts:
+            - name: workspace-volume
+              mountPath: /home/jenkins/agent
+            - name: docker-config
+              mountPath: /kaniko/.docker/
+          volumes:          
+          - name: workspace-volume
+            emptyDir: {}          
+          - name: docker-config
+            secret:
+              secretName: dockerhub-credentials
+              items:
+                - key: .dockerconfigjson
+                  path: config.json
+        """
+    }
+  }
 
   environment {
     IMAGE = "ndbaolam/bluemoon-be"
@@ -51,6 +82,39 @@ pipeline {
           """
         }
       }
+    }
+
+    stage('Update K8s Manifest Repo') {
+      steps {
+        script {
+          def dockerImageTag = "${env.IMAGE}:${env.TAG}"
+          withCredentials([
+            sshUserPrivateKey(
+              credentialsId: 'githubid',
+              keyFileVariable: 'GIT_SSH_KEY'
+            )]) {
+            dir('helm/app-chart') {
+              sh """
+                sed -i 's|^\\( *image: \\)ndbaolam/bluemoon-be:.*|\\1ndbaolam/bluemoon-be:${TAG}|' values.yaml
+
+                git config --global user.email 'baolam782004@gmail.com'
+                git config --global user.name jenkins
+                
+                git add values.yaml
+                git commit -m "Update BE image to ${env.TAG}"
+                git push origin main
+              """
+            }
+          }
+        }        
+      }
+    }
+  }    
+
+  post {
+    always {
+      echo 'Pipeline kết thúc.'
+      cleanWs()
     }
   }
 }
