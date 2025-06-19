@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: be-deployment
+  namespace: ktpm
 spec:
   replicas: 1
   selector:
@@ -32,3 +33,17 @@ spec:
             value: "{{ .Values.be.env.ACCESS_TOKEN_EXPIRE_MINUTES }}"
         ports:
         - containerPort: {{ .Values.be.service.port }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: be-service
+  namespace: ktpm
+spec:
+  selector:
+    app: be
+  ports:
+  - port: {{ .Values.be.service.port }}
+    targetPort: {{ .Values.be.service.port }}
+    # nodePort: {{ .Values.be.service.nodePort }}
+  type: {{ .Values.be.service.type }}

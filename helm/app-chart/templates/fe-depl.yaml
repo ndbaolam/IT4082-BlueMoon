@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: fe-deployment
+  namespace: ktpm
 spec:
   replicas: {{ .Values.fe.replicaCount }}
   selector:
@@ -20,3 +21,17 @@ spec:
           value: {{ .Values.fe.env.VITE_API_URL }}
         ports:
         - containerPort: {{ .Values.fe.service.port }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fe-service
+  namespace: ktpm
+spec:
+  type: {{ .Values.fe.service.type }}
+  selector:
+    app: fe
+  ports:
+    - port: {{ .Values.fe.service.port }}
+      targetPort: {{ .Values.fe.service.port }}
+      # nodePort: {{ .Values.fe.service.nodePort }}

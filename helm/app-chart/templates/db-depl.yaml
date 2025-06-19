@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: db-deployment
+  namespace: ktpm
 spec:
   replicas: 1
   selector:
@@ -31,3 +32,29 @@ spec:
         - name: db-storage
           persistentVolumeClaim:
             claimName: db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-service
+  namespace: ktpm
+spec:
+  type: {{ .Values.db.service.type }}
+  selector:
+    app: db
+  ports:
+    - port: {{ .Values.db.service.port }}
+      targetPort: {{ .Values.db.service.port }}      
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db-pvc  
+  namespace: ktpm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.db.persistence.size }}
+  storageClassName: {{ .Values.db.persistence.storageClass }}

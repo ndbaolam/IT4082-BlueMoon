@@ -2,8 +2,9 @@ fe:
   image: ndbaolam/bluemoon-fe:latest
   replicaCount: 1
   service:
-    type: NodePort
+    type: ClusterIP
     port: 80
+    nodePort: 30007
   env:
     VITE_API_URL: http://be-service:8000
 
@@ -12,8 +13,9 @@ be:
   image: ndbaolam/bluemoon-be:latest
   replicaCount: 1
   service:
-    type: NodePort
+    type: ClusterIP
     port: 8000
+    nodePort: 30006
   env:    
     DATABASE_URL: "postgresql://ktpm:ktpm@db-service:5432/ktpm"
     SECRET_KEY: secret-key
@@ -34,3 +36,22 @@ db:
     POSTGRES_USER: ktpm
     POSTGRES_PASSWORD: ktpm
     POSTGRES_DB: ktpm
+
+haproxyIngress:
+  enabled: true
+  image:
+    repository: quay.io/jcmoraisjr/haproxy-ingress
+    tag: v0.14.0
+  replicas: 1
+  service:
+    type: LoadBalancer
+    ports:
+      http: 80
+      https: 443
+
+ingress:
+  enabled: true
+  className: nginx
+  feHost: minikube.app1
+  beHost: minikube.app2
+  tlsSecret: app-tls
