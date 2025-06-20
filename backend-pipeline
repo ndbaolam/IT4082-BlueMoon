@@ -100,6 +100,8 @@ pipeline {
 
                 git config --global user.email 'baolam782004@gmail.com'
                 git config --global user.name jenkins
+
+                git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/ndbaolam/IT4082-BlueMoon.git
                 
                 git add values.yaml
                 git commit -m "Update BE image to ${env.TAG}"
