@@ -55,3 +55,4 @@ ingress:
   feHost: minikube.app1
   beHost: minikube.app2
   tlsSecret: app-tls
+  authSecret: basic-auth

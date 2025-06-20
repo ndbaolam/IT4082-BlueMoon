@@ -35,3 +35,30 @@ spec:
     - port: {{ .Values.fe.service.port }}
       targetPort: {{ .Values.fe.service.port }}
       # nodePort: {{ .Values.fe.service.nodePort }}
+---
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fe-ingress
+  namespace: ktpm
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: {{ .Values.ingress.className | quote }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.feHost }}
+      secretName: {{ .Values.ingress.tlsSecret }}
+  rules:
+    - host: {{ .Values.ingress.feHost }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: fe-service
+                port:
+                  number: {{ .Values.fe.service.port }}
+{{- end }}

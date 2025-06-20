@@ -87,9 +87,10 @@ pipeline {
         script {
           def dockerImageTag = "${env.IMAGE}:${env.TAG}"
           withCredentials([
-            sshUserPrivateKey(
-              credentialsId: 'githubid',
-              keyFileVariable: 'GIT_SSH_KEY'
+            usernamePassword(
+              credentialsId: 'github_credentials',
+              usernameVariable: 'GIT_USERNAME',
+              passwordVariable: 'GIT_PASSWORD'
             )]) {
             dir('helm/app-chart') {
               sh """

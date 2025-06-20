@@ -47,3 +47,33 @@ spec:
     targetPort: {{ .Values.be.service.port }}
     # nodePort: {{ .Values.be.service.nodePort }}
   type: {{ .Values.be.service.type }}
+---
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: be-ingress
+  namespace: ktpm
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: {{ .Values.ingress.authSecret }}
+    nginx.ingress.kubernetes.io/auth-realm: "Protected Backend"
+spec:
+  ingressClassName: {{ .Values.ingress.className | quote }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.beHost }}
+      secretName: {{ .Values.ingress.tlsSecret }}
+  rules:
+    - host: {{ .Values.ingress.beHost }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: be-service
+                port:
+                  number: {{ .Values.be.service.port }}
+{{- end }}
