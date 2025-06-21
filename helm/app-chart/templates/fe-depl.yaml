@@ -42,8 +42,12 @@ kind: Ingress
 metadata:
   name: fe-ingress
   namespace: ktpm
+  labels:
+    app.kubernetes.io/managed-by: Helm
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
+    meta.helm.sh/release-name: my-app
+    meta.helm.sh/release-namespace: ktpm
 spec:
   ingressClassName: {{ .Values.ingress.className | quote }}
   tls:

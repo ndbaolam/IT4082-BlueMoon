@@ -5,7 +5,8 @@ pipeline {
         apiVersion: v1
         kind: Pod
         metadata:
-          namespace: ktpm
+          namespace: cicd
+          name: kaniko
         spec:
           containers:              
           # Kaniko để build image          
@@ -13,7 +14,14 @@ pipeline {
             image: gcr.io/kaniko-project/executor:debug
             imagePullPolicy: Always
             command: [sleep]
-            args: [9999999]
+            args: ["9999999"]
+            resources:
+              requests:
+                cpu: "100m"
+                memory: "128Mi"
+              limits:
+                cpu: "500m"
+                memory: "512Mi"
             volumeMounts:
             - name: workspace-volume
               mountPath: /home/jenkins/agent
@@ -90,9 +98,9 @@ pipeline {
           def dockerImageTag = "${env.IMAGE}:${env.TAG}"
           withCredentials([
             usernamePassword(
-              credentialsId: 'github_credentials',
+              credentialsId: 'github_pat',
               usernameVariable: 'GIT_USERNAME',
-              passwordVariable: 'GIT_PASSWORD'
+              passwordVariable: 'GIT_TOKEN'
             )]) {
             dir('helm/app-chart') {
               sh """
@@ -101,7 +109,7 @@ pipeline {
                 git config --global user.email 'baolam782004@gmail.com'
                 git config --global user.name jenkins
 
-                git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/ndbaolam/IT4082-BlueMoon.git
+                git remote set-url origin https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/ndbaolam/IT4082-BlueMoon.git
                 
                 git add values.yaml
                 git commit -m "Update BE image to ${env.TAG}"
