@@ -4,7 +4,7 @@ metadata:
   name: db-deployment
   namespace: ktpm
 spec:
-  replicas: 1
+  replicas: {{ .Values.db.replicaCount }}
   selector:
     matchLabels:
       app: db
@@ -51,6 +51,11 @@ kind: PersistentVolumeClaim
 metadata:
   name: db-pvc  
   namespace: ktpm
+  labels:
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    meta.helm.sh/release-name: my-app
+    meta.helm.sh/release-namespace: ktpm
 spec:
   accessModes:
     - ReadWriteOnce

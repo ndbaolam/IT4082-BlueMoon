@@ -5,7 +5,8 @@ pipeline {
         apiVersion: v1
         kind: Pod
         metadata:
-          namespace: ktpm
+          namespace: cicd
+          name: kaniko
         spec:
           containers:              
           # Kaniko để build image          
@@ -13,7 +14,14 @@ pipeline {
             image: gcr.io/kaniko-project/executor:debug
             imagePullPolicy: Always
             command: [sleep]
-            args: [9999999]
+            args: ["9999999"]
+            resources:
+              requests:
+                cpu: "100m"
+                memory: "128Mi"
+              limits:
+                cpu: "500m"
+                memory: "512Mi"
             volumeMounts:
             - name: workspace-volume
               mountPath: /home/jenkins/agent
