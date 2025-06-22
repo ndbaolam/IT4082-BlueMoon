@@ -1,9 +1,10 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: db-deployment
+  name: db-statefulset
   namespace: ktpm
 spec:
+  serviceName: db-service
   replicas: {{ .Values.db.replicaCount }}
   selector:
     matchLabels:
@@ -19,19 +20,24 @@ spec:
           ports:
             - containerPort: 5432
           env:
-          - name: POSTGRES_USER
-            value: {{ .Values.db.env.POSTGRES_USER }}
-          - name: POSTGRES_PASSWORD
-            value: {{ .Values.db.env.POSTGRES_PASSWORD }}
-          - name: POSTGRES_DB
-            value: {{ .Values.db.env.POSTGRES_DB }}
+            - name: POSTGRES_USER
+              value: {{ .Values.db.env.POSTGRES_USER }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.db.env.POSTGRES_PASSWORD }}
+            - name: POSTGRES_DB
+              value: {{ .Values.db.env.POSTGRES_DB }}
           volumeMounts:
             - name: db-storage
               mountPath: /var/lib/postgresql/data
-      volumes:
-        - name: db-storage
-          persistentVolumeClaim:
-            claimName: db-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: db-storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: {{ .Values.db.persistence.storageClass }}
+        resources:
+          requests:
+            storage: {{ .Values.db.persistence.size }}
 ---
 apiVersion: v1
 kind: Service
@@ -39,27 +45,9 @@ metadata:
   name: db-service
   namespace: ktpm
 spec:
-  type: {{ .Values.db.service.type }}
+  clusterIP: None
   selector:
     app: db
   ports:
     - port: {{ .Values.db.service.port }}
-      targetPort: {{ .Values.db.service.port }}      
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: db-pvc  
-  namespace: ktpm
-  labels:
-    app.kubernetes.io/managed-by: Helm
-  annotations:
-    meta.helm.sh/release-name: my-app
-    meta.helm.sh/release-namespace: ktpm
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: {{ .Values.db.persistence.size }}
-  storageClassName: {{ .Values.db.persistence.storageClass }}
+      targetPort: {{ .Values.db.service.port }}
