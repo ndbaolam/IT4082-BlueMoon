@@ -23,7 +23,7 @@ be:
     ACCESS_TOKEN_EXPIRE_MINUTES: "60"
 
 auth:
-  image: ndbaolam/basic-auth:f29357f
+  image: ndbaolam/basic-auth:latest
   replicaCount: 1
   service:
     type: ClusterIP

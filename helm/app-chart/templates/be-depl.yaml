@@ -87,4 +87,38 @@ spec:
                 name: be-service
                 port:
                   number: {{ .Values.be.service.port }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-ingress
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/limit-connections: "1"
+    nginx.ingress.kubernetes.io/limit-rpm: "10"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "1"
+    nginx.ingress.kubernetes.io/limit-exempt: ""
+    nginx.ingress.kubernetes.io/limit-rate-after: "1"
+    nginx.ingress.kubernetes.io/limit-whitelist: ""
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      if ($limit_req_status = 503) {
+        return 409;
+      }
+spec:  
+  ingressClassName: {{ .Values.ingress.className | quote }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.beHost }}
+      secretName: {{ .Values.ingress.tlsSecret }}
+  rules:
+    - host: {{ .Values.ingress.beHost }}
+      http:
+        paths:
+          - path: /users
+            pathType: Prefix
+            backend:
+              service:
+                name: be-service
+                port:
+                  number: {{ .Values.be.service.port }}
 {{- end }}
