@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 import logging
 from time import time
+import json
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("uvicorn.access")
@@ -23,12 +24,13 @@ app.add_middleware(
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
-    start_time = time()
     response = await call_next(request)
-    duration = time() - start_time
-    logger.info(
-        f"{request.method} {request.url.path} - Status: {response.status_code} - Duration: {duration:.2f}s"
-    )
+    log_data = {
+        "request_path": request.url.path,
+        "http_method": request.method,
+        "response_code": response.status_code,
+    }
+    logger.info(json.dumps(log_data))
     return response
 
 app.include_router(user.router)
