@@ -10,7 +10,7 @@ fe:
 
 
 be:
-  image: ndbaolam/bluemoon-be:latest
+  image: ndbaolam/bluemoon-be:f7ce5b3
   replicaCount: 1
   service:
     type: ClusterIP

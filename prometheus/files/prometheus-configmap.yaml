@@ -14,3 +14,6 @@ data:
       - job_name: 'bluemoon-be'
         static_configs:
           - targets: ['be-service.ktpm.svc.cluster.local:8000']
+      - job_name: 'auth-service'
+        static_configs:
+          - targets: ['auth-service.ktpm.svc.cluster.local:3000']

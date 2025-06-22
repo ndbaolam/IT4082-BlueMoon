@@ -3,6 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, Response
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from passlib.apache import HtpasswdFile
+from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI()
 security = HTTPBasic()
@@ -45,3 +46,5 @@ async def auth(request: Request):
         return JSONResponse(status_code=403, content={"detail": "Insufficient permission"})
 
     return Response(status_code=200)
+
+Instrumentator().instrument(app).expose(app)
