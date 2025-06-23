@@ -60,10 +60,10 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /
     # nginx.ingress.kubernetes.io/auth-type: basic
     # nginx.ingress.kubernetes.io/auth-secret: {{ .Values.ingress.authSecret }}
-    nginx.ingress.kubernetes.io/auth-url: "http://auth-service.ktpm.svc.cluster.local:3000/auth"
-    nginx.ingress.kubernetes.io/auth-signin: "false" 
-    nginx.ingress.kubernetes.io/auth-realm: "Protected Backend"
-    nginx.ingress.kubernetes.io/auth-response-headers: Authorization
+    # nginx.ingress.kubernetes.io/auth-url: "http://auth-service.ktpm.svc.cluster.local:3000/auth"
+    # nginx.ingress.kubernetes.io/auth-signin: "false" 
+    # nginx.ingress.kubernetes.io/auth-realm: "Protected Backend"
+    # nginx.ingress.kubernetes.io/auth-response-headers: Authorization
     # nginx.ingress.kubernetes.io/auth-snippet: |
     #   if ($http_authorization = "") {
     #     return 403;
@@ -81,36 +81,6 @@ spec:
       http:
         paths:
           - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: be-service
-                port:
-                  number: {{ .Values.be.service.port }}
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: api-ingress
-  namespace: default
-  annotations:
-    nginx.ingress.kubernetes.io/limit-connections: "1"
-    nginx.ingress.kubernetes.io/limit-rpm: "10"
-    nginx.ingress.kubernetes.io/limit-burst-multiplier: "1"
-    nginx.ingress.kubernetes.io/limit-exempt: ""
-    nginx.ingress.kubernetes.io/limit-rate-after: "1"
-    nginx.ingress.kubernetes.io/limit-whitelist: ""    
-spec:  
-  ingressClassName: {{ .Values.ingress.className | quote }}
-  tls:
-    - hosts:
-        - {{ .Values.ingress.beHost }}
-      secretName: {{ .Values.ingress.tlsSecret }}
-  rules:
-    - host: {{ .Values.ingress.beHost }}
-      http:
-        paths:
-          - path: /users
             pathType: Prefix
             backend:
               service:

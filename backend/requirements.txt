@@ -9,3 +9,4 @@ passlib[bcrypt]
 python-multipart
 pydantic[email]
 prometheus-fastapi-instrumentator
+aiocache

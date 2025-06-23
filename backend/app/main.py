@@ -6,6 +6,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 import logging
 from time import time
 import json
+from ratelimit import APIRateLimiterMiddleware
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("uvicorn.access")
@@ -20,6 +21,12 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+app.add_middleware(
+    APIRateLimiterMiddleware,
+    max_requests=10,    # 10 requests
+    window_seconds=60   # 1 phút
 )
 
 @app.middleware("http")
